@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
 
-__all__ = ['AlexNetSix', 'alexnet_six_64x64']
+__all__ = ["AlexNetSix", "alexnet_six_64x64"]
+
 
 class AlexNetSix(nn.Module):
-
     def __init__(self, num_classes=1000, pool_size=6):
         super(AlexNetSix, self).__init__()
 
@@ -50,8 +50,9 @@ def alexnet_six_64x64(pretrained=False, **kwargs):
 
     return model
 
+
 if __name__ == "__main__":
     m = alexnet_six_64x64()
-    inputs = torch.rand(4,3,64,64)
+    inputs = torch.rand(4, 3, 64, 64)
     outputs = m(inputs)
     print(outputs.shape)

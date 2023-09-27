@@ -5,6 +5,7 @@ from mouse_vision.model_training.custom_heads import CustomHeadBase
 
 __all__ = ["FinetuneLoss"]
 
+
 class FinetuneLoss(LossFunctionBase):
     """
     This loss just wraps the cross-entropy loss but also incorporates the
@@ -14,6 +15,7 @@ class FinetuneLoss(LossFunctionBase):
         readout_module : (CustomHeadBase) an instance of nn.Module that is the
                          custom head readout for finetuning / transfer
     """
+
     def __init__(self, readout_module):
         super(FinetuneLoss, self).__init__()
         assert isinstance(readout_module, CustomHeadBase)
@@ -40,5 +42,3 @@ class FinetuneLoss(LossFunctionBase):
         loss = self.loss(preds, targets)
 
         return loss, preds
-
-

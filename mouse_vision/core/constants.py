@@ -38,7 +38,7 @@ CLASSIC_NOISECORRECTION = {
     "num_splits": 1,
     "train_frac": 0.0,
     "center_trials": False,
-    "mode": "spearman_brown_split_half_denominator"
+    "mode": "spearman_brown_split_half_denominator",
 }
 
 PAIRWISE_INTERANIMAL_NOISECORRECTION = {
@@ -49,10 +49,10 @@ PAIRWISE_INTERANIMAL_NOISECORRECTION = {
     "mode": "spearman_brown_split_half_denominator",
     "separate_by_animal": True,
     "interanimal_correction": {
-        'n_iter': 900,
-        'equalize_source_units': False,
-        'map_kwargs': 'map_kwargs{}map_typeidentity'
-    }
+        "n_iter": 900,
+        "equalize_source_units": False,
+        "map_kwargs": "map_kwargs{}map_typeidentity",
+    },
 }
 
 HOLDOUT_INTERANIMAL_NOISECORRECTION = {
@@ -63,11 +63,11 @@ HOLDOUT_INTERANIMAL_NOISECORRECTION = {
     "mode": "spearman_brown_split_half_denominator",
     "separate_by_animal": True,
     "interanimal_correction": {
-        'n_iter': 900,
-        'equalize_source_units': False,
-        'mode': 'holdout',
-        'map_kwargs': 'map_kwargs{}map_typeidentity'
-    }
+        "n_iter": 900,
+        "equalize_source_units": False,
+        "mode": "holdout",
+        "map_kwargs": "map_kwargs{}map_typeidentity",
+    },
 }
 
 HOLDOUT_INTERANIMAL_NOISECORRECTION_PLS = {
@@ -78,14 +78,14 @@ HOLDOUT_INTERANIMAL_NOISECORRECTION_PLS = {
     "mode": "spearman_brown_split_half_denominator",
     "separate_by_animal": True,
     "interanimal_correction": {
-        'n_iter': 100,
-        'equalize_source_units': False,
-        'mode': 'holdout',
-        'map_kwargs': {
+        "n_iter": 100,
+        "equalize_source_units": False,
+        "mode": "holdout",
+        "map_kwargs": {
             "map_type": "pls",
-            "map_kwargs": {'n_components': 25, 'fit_per_target_unit': False}
-        }
-    }
+            "map_kwargs": {"n_components": 25, "fit_per_target_unit": False},
+        },
+    },
 }
 
 HOLDOUT_INTERANIMAL_NOISECORRECTION_CORR = {
@@ -96,14 +96,14 @@ HOLDOUT_INTERANIMAL_NOISECORRECTION_CORR = {
     "mode": "spearman_brown_split_half_denominator",
     "separate_by_animal": True,
     "interanimal_correction": {
-        'n_iter': 100,
-        'equalize_source_units': False,
-        'mode': 'holdout',
-        'map_kwargs': {
+        "n_iter": 100,
+        "equalize_source_units": False,
+        "mode": "holdout",
+        "map_kwargs": {
             "map_type": "corr",
-            "map_kwargs": {'identity': True, 'percentile': 100}
-        }
-    }
+            "map_kwargs": {"identity": True, "percentile": 100},
+        },
+    },
 }
 
 HOLDOUT_INTERANIMAL_NOISECORRECTION_IDENTITY = {
@@ -114,15 +114,49 @@ HOLDOUT_INTERANIMAL_NOISECORRECTION_IDENTITY = {
     "mode": "spearman_brown_split_half_denominator",
     "separate_by_animal": True,
     "interanimal_correction": {
-        'n_iter': 100,
-        'equalize_source_units': False,
-        'mode': 'holdout',
-        'map_kwargs': {"map_type": "identity", "map_kwargs": {}}
-    }
+        "n_iter": 100,
+        "equalize_source_units": False,
+        "mode": "holdout",
+        "map_kwargs": {"map_type": "identity", "map_kwargs": {}},
+    },
 }
 
 # SKLEARN TRANSFER CONSTANTS
 SVM_CV_C = [5e-2, 5e-1, 1.0, 5e1, 5e2, 5e3, 5e4]
-SVM_CV_C_LONG = [1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1, 1, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4, 5e4, 1e5, 5e5, 1e6, 5e6, 1e7, 5e7, 1e8, 5e8]
+SVM_CV_C_LONG = [
+    1e-8,
+    5e-8,
+    1e-7,
+    5e-7,
+    1e-6,
+    5e-6,
+    1e-5,
+    5e-5,
+    1e-4,
+    5e-4,
+    1e-3,
+    5e-3,
+    1e-2,
+    5e-2,
+    1e-1,
+    5e-1,
+    1,
+    1e1,
+    5e1,
+    1e2,
+    5e2,
+    1e3,
+    5e3,
+    1e4,
+    5e4,
+    1e5,
+    5e5,
+    1e6,
+    5e6,
+    1e7,
+    5e7,
+    1e8,
+    5e8,
+]
 RIDGE_CV_ALPHA = [0.01, 0.1, 1, 10]
-RIDGE_CV_ALPHA_LONG = list(1.0/np.array(SVM_CV_C_LONG))
+RIDGE_CV_ALPHA_LONG = list(1.0 / np.array(SVM_CV_C_LONG))

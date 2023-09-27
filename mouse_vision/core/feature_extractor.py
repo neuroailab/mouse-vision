@@ -1,7 +1,8 @@
 import numpy as np
 import torch
 
-class FeatureExtractor():
+
+class FeatureExtractor:
     """
     Extracts activations from a layer of a model.
 
@@ -13,6 +14,7 @@ class FeatureExtractor():
         vectorize  : (boolean) whether to convert layer features into vector
         debug      : (boolean) whether or not to test with two batches
     """
+
     def __init__(self, dataloader, n_batches=None, vectorize=False, debug=False):
         self.dataloader = dataloader
         if n_batches is None:
@@ -41,7 +43,7 @@ class FeatureExtractor():
         handle = model_layer.register_forward_hook(self._store_features)
 
         with torch.no_grad():
-            for i, (x,label_x) in enumerate(self.dataloader):
+            for i, (x, label_x) in enumerate(self.dataloader):
                 if i == self.n_batches:
                     break
 
@@ -69,6 +71,7 @@ class FeatureExtractor():
 
         return self.layer_feats
 
+
 class CustomFeatureExtractor(FeatureExtractor):
     """
     Extracts activations from a layer of a custom model, e.g. MouseNet, where we do not use nn.Sequential.
@@ -81,6 +84,7 @@ class CustomFeatureExtractor(FeatureExtractor):
         vectorize  : (boolean) whether to convert layer features into vector
         debug      : (boolean) whether or not to test with two batches
     """
+
     def __init__(self, dataloader, **kwargs):
         super(CustomFeatureExtractor, self).__init__(dataloader, **kwargs)
 
@@ -93,7 +97,7 @@ class CustomFeatureExtractor(FeatureExtractor):
         self.layer_feats = list()
         self.labels = list()
         with torch.no_grad():
-            for i, (x,label_x) in enumerate(self.dataloader):
+            for i, (x, label_x) in enumerate(self.dataloader):
                 if i == self.n_batches:
                     break
 
@@ -126,7 +130,10 @@ class CustomFeatureExtractor(FeatureExtractor):
 
         return self.layer_feats
 
-def get_layer_features(feature_extractor, layer_name, model, model_name, return_labels=False):
+
+def get_layer_features(
+    feature_extractor, layer_name, model, model_name, return_labels=False
+):
     """
     Helper function to extract stimuli features from a layer in a model.
 
@@ -143,16 +150,20 @@ def get_layer_features(feature_extractor, layer_name, model, model_name, return_
     else:
         layer_module = model
 
-    for part in layer_name.split('.'):
+    for part in layer_name.split("."):
         if "mousenet" in model_name or "alexnet_64x64_input_dict" in model_name:
             layer_module = part
         else:
             layer_module = layer_module._modules.get(part)
-        assert layer_module is not None, \
-                f"No submodule found for layer {layer_name}, at part {part}."
+        assert (
+            layer_module is not None
+        ), f"No submodule found for layer {layer_name}, at part {part}."
 
-    features = feature_extractor.extract_features(model=model, model_layer=layer_module, return_labels=return_labels)
+    features = feature_extractor.extract_features(
+        model=model, model_layer=layer_module, return_labels=return_labels
+    )
     return features
+
 
 if __name__ == "__main__":
     import torchvision.transforms as transforms
@@ -167,8 +178,10 @@ if __name__ == "__main__":
     dataloader = get_image_array_dataloader(array, torch.ones(N), img_transforms)
 
     layer_name = "features.0"
-    fe = FeatureExtractor(dataloader=dataloader, n_batches=3, vectorize=False, debug=True)
-    features = get_layer_features(feature_extractor=fe, layer_name=layer_name, model=model, model_name="alexnet")
+    fe = FeatureExtractor(
+        dataloader=dataloader, n_batches=3, vectorize=False, debug=True
+    )
+    features = get_layer_features(
+        feature_extractor=fe, layer_name=layer_name, model=model, model_name="alexnet"
+    )
     print(features.shape)
-
-

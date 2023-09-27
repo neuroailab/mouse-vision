@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
 
-__all__ = ['AlexNetFive', 'alexnet_five_64x64']
+__all__ = ["AlexNetFive", "alexnet_five_64x64"]
+
 
 class AlexNetFive(nn.Module):
-
     def __init__(self, num_classes=1000, pool_size=6):
         super(AlexNetFive, self).__init__()
 
@@ -27,8 +27,7 @@ class AlexNetFive(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((pool_size, pool_size))
 
         self.classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Linear(256 * pool_size * pool_size, num_classes),
+            nn.Dropout(), nn.Linear(256 * pool_size * pool_size, num_classes),
         )
 
     def forward(self, x):
@@ -48,8 +47,9 @@ def alexnet_five_64x64(pretrained=False, **kwargs):
 
     return model
 
+
 if __name__ == "__main__":
     m = alexnet_five_64x64()
-    inputs = torch.rand(4,3,64,64)
+    inputs = torch.rand(4, 3, 64, 64)
     outputs = m(inputs)
     print(outputs.shape)

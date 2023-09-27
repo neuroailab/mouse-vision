@@ -36,7 +36,7 @@ class AlexNetRotNet(nn.Module):
             nn.Conv2d(256, 256, kernel_size=3, padding=1),
             nn.BatchNorm2d(256),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2), # pool5
+            nn.MaxPool2d(kernel_size=3, stride=2),  # pool5
         )
 
         self.readout_features = self.features[:-1]
@@ -87,5 +87,3 @@ def alexnet_rotnet_transfer(pretrained=False, progress=True, **kwargs):
     """
     model = AlexNetRotNet(finetune_readout=True, **kwargs)
     return model
-
-

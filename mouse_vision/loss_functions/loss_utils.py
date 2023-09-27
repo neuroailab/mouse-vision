@@ -1,8 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.distributed as dist
+
 # from functools import partial
 # from mouse_vision.models.custom_ops import SyncBatchNorm
+
 
 def l2_normalize(x, dim=1):
     """
@@ -39,6 +41,7 @@ class GatherLayer(torch.autograd.Function):
         grad_out[:] = grads[dist.get_rank()]
         return grad_out
 
+
 # Taken from: https://github.com/open-mmlab/OpenSelfSup/blob/aa62006c6e0fb3ee9474dbe8e009b65af35e8e06/openselfsup/models/utils/norm.py
 
 norm_cfg = {
@@ -51,7 +54,8 @@ norm_cfg = {
     # and potentially 'SN'
 }
 
-def build_norm_layer(cfg, num_features, postfix=''):
+
+def build_norm_layer(cfg, num_features, postfix=""):
     """Build normalization layer.
     Args:
         cfg (dict): cfg should contain:
@@ -68,12 +72,12 @@ def build_norm_layer(cfg, num_features, postfix=''):
     if cfg is None:
         return "identity", nn.Identity()
     else:
-        assert isinstance(cfg, dict) and 'type' in cfg
+        assert isinstance(cfg, dict) and "type" in cfg
         cfg_ = cfg.copy()
 
-        layer_type = cfg_.pop('type')
+        layer_type = cfg_.pop("type")
         if layer_type not in norm_cfg:
-            raise KeyError('Unrecognized norm type {}'.format(layer_type))
+            raise KeyError("Unrecognized norm type {}".format(layer_type))
         else:
             abbr, norm_layer = norm_cfg[layer_type]
             if norm_layer is None:
@@ -82,15 +86,15 @@ def build_norm_layer(cfg, num_features, postfix=''):
         assert isinstance(postfix, (int, str))
         name = abbr + str(postfix)
 
-        requires_grad = cfg_.pop('requires_grad', True)
-        cfg_.setdefault('eps', 1e-5)
-        if layer_type != 'GN':
+        requires_grad = cfg_.pop("requires_grad", True)
+        cfg_.setdefault("eps", 1e-5)
+        if layer_type != "GN":
             layer = norm_layer(num_features, **cfg_)
-            if layer_type == 'SyncBN':
+            if layer_type == "SyncBN":
                 # Note: if TPUSyncBN is ever supported, this is likely not relevant
                 layer._specify_ddp_gpu_num(1)
         else:
-            assert 'num_groups' in cfg_
+            assert "num_groups" in cfg_
             layer = norm_layer(num_channels=num_features, **cfg_)
 
         for param in layer.parameters():
@@ -141,4 +145,3 @@ def _init_weights(module, init_linear="normal", std=0.01, bias=0.0):
                 nn.init.constant_(m.weight, 1)
             if m.bias is not None:
                 nn.init.constant_(m.bias, 0)
-

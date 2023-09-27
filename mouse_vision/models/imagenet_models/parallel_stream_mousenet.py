@@ -4,28 +4,55 @@ from mouse_vision.loss_functions.loss_utils import build_norm_layer
 import numpy as np
 import copy
 
-__all__ = ["simplified_mousenet_six_stream", "simplified_mousenet_six_stream_visp_3x3",
-           "simplified_mousenet_six_stream_vispor_only", "simplified_mousenet_six_stream_vispor_only_visp_3x3",
-           "simplified_mousenet_dual_stream", "simplified_mousenet_dual_stream_visp_3x3",
-           "simplified_mousenet_dual_stream_vispor_only", "simplified_mousenet_dual_stream_vispor_only_visp_3x3",
-           "simplified_mousenet_single_stream", "simplified_mousenet_single_stream_ir",
-           "simplified_mousenet_single_stream_rotnet", "simplified_mousenet_single_stream_mocov2",
-           "simplified_mousenet_single_stream_simclr", "simplified_mousenet_single_stream_simsiam",
-           "simplified_mousenet_dual_stream_visp_3x3_bn", "simplified_mousenet_dual_stream_visp_3x3_ir",
-           "simplified_mousenet_dual_stream_visp_3x3_rotnet", "simplified_mousenet_dual_stream_visp_3x3_mocov2",
-           "simplified_mousenet_dual_stream_visp_3x3_simclr", "simplified_mousenet_dual_stream_visp_3x3_simsiam",
-           "simplified_mousenet_six_stream_visp_3x3_bn", "simplified_mousenet_six_stream_visp_3x3_ir",
-           "simplified_mousenet_single_stream_ir_224x224", "simplified_mousenet_dual_stream_visp_3x3_ir_224x224",
-           "simplified_mousenet_six_stream_visp_3x3_ir_224x224", "simplified_mousenet_dual_stream_visp_3x3_ir_32x32",
-           "simplified_mousenet_dual_stream_visp_3x3_ir_44x44", "simplified_mousenet_dual_stream_visp_3x3_ir_84x84",
-           "simplified_mousenet_dual_stream_visp_3x3_ir_104x104", "simplified_mousenet_dual_stream_visp_3x3_ir_124x124",
-           "simplified_mousenet_dual_stream_visp_3x3_ir_144x144", "simplified_mousenet_dual_stream_visp_3x3_ir_164x164",
-           "simplified_mousenet_dual_stream_visp_3x3_ir_184x184", "simplified_mousenet_dual_stream_visp_3x3_ir_204x204",
-           "simplified_mousenet_six_stream_visp_3x3_rotnet", "simplified_mousenet_six_stream_visp_3x3_mocov2",
-           "simplified_mousenet_six_stream_visp_3x3_simclr", "simplified_mousenet_six_stream_visp_3x3_simsiam",
-           "simplified_mousenet_ae_single_stream", "simplified_mousenet_ae_dual_stream", "simplified_mousenet_ae_six_stream",
-           "simplified_mousenet_depth_hour_glass_single_stream", "simplified_mousenet_depth_hour_glass_dual_stream", "simplified_mousenet_depth_hour_glass_six_stream",
-           "simplified_mousenet_single_stream_rand", "simplified_mousenet_dual_stream_visp_3x3_bn_rand", "simplified_mousenet_six_stream_visp_3x3_bn_rand"]
+__all__ = [
+    "simplified_mousenet_six_stream",
+    "simplified_mousenet_six_stream_visp_3x3",
+    "simplified_mousenet_six_stream_vispor_only",
+    "simplified_mousenet_six_stream_vispor_only_visp_3x3",
+    "simplified_mousenet_dual_stream",
+    "simplified_mousenet_dual_stream_visp_3x3",
+    "simplified_mousenet_dual_stream_vispor_only",
+    "simplified_mousenet_dual_stream_vispor_only_visp_3x3",
+    "simplified_mousenet_single_stream",
+    "simplified_mousenet_single_stream_ir",
+    "simplified_mousenet_single_stream_rotnet",
+    "simplified_mousenet_single_stream_mocov2",
+    "simplified_mousenet_single_stream_simclr",
+    "simplified_mousenet_single_stream_simsiam",
+    "simplified_mousenet_dual_stream_visp_3x3_bn",
+    "simplified_mousenet_dual_stream_visp_3x3_ir",
+    "simplified_mousenet_dual_stream_visp_3x3_rotnet",
+    "simplified_mousenet_dual_stream_visp_3x3_mocov2",
+    "simplified_mousenet_dual_stream_visp_3x3_simclr",
+    "simplified_mousenet_dual_stream_visp_3x3_simsiam",
+    "simplified_mousenet_six_stream_visp_3x3_bn",
+    "simplified_mousenet_six_stream_visp_3x3_ir",
+    "simplified_mousenet_single_stream_ir_224x224",
+    "simplified_mousenet_dual_stream_visp_3x3_ir_224x224",
+    "simplified_mousenet_six_stream_visp_3x3_ir_224x224",
+    "simplified_mousenet_dual_stream_visp_3x3_ir_32x32",
+    "simplified_mousenet_dual_stream_visp_3x3_ir_44x44",
+    "simplified_mousenet_dual_stream_visp_3x3_ir_84x84",
+    "simplified_mousenet_dual_stream_visp_3x3_ir_104x104",
+    "simplified_mousenet_dual_stream_visp_3x3_ir_124x124",
+    "simplified_mousenet_dual_stream_visp_3x3_ir_144x144",
+    "simplified_mousenet_dual_stream_visp_3x3_ir_164x164",
+    "simplified_mousenet_dual_stream_visp_3x3_ir_184x184",
+    "simplified_mousenet_dual_stream_visp_3x3_ir_204x204",
+    "simplified_mousenet_six_stream_visp_3x3_rotnet",
+    "simplified_mousenet_six_stream_visp_3x3_mocov2",
+    "simplified_mousenet_six_stream_visp_3x3_simclr",
+    "simplified_mousenet_six_stream_visp_3x3_simsiam",
+    "simplified_mousenet_ae_single_stream",
+    "simplified_mousenet_ae_dual_stream",
+    "simplified_mousenet_ae_six_stream",
+    "simplified_mousenet_depth_hour_glass_single_stream",
+    "simplified_mousenet_depth_hour_glass_dual_stream",
+    "simplified_mousenet_depth_hour_glass_six_stream",
+    "simplified_mousenet_single_stream_rand",
+    "simplified_mousenet_dual_stream_visp_3x3_bn_rand",
+    "simplified_mousenet_six_stream_visp_3x3_bn_rand",
+]
 
 
 class MultiStreamMouseNet(nn.Module):
@@ -50,6 +77,7 @@ class MultiStreamMouseNet(nn.Module):
         num_classes      : (int) number of output classes for the task.
                            Default: 1000 (ImageNet)
     """
+
     def __init__(
         self,
         parallel_modules=["VISl", "VISrl", "VISal", "VISli", "VISpm", "VISpl"],
@@ -60,14 +88,13 @@ class MultiStreamMouseNet(nn.Module):
         norm_layer=None,
         single_stream=False,
         drop_final_fc=False,
-        return_maxpool_indices=False
+        return_maxpool_indices=False,
     ):
         super(MultiStreamMouseNet, self).__init__()
 
         self.return_maxpool_indices = return_maxpool_indices
 
-        assert pool_size > 0, \
-            f"Pooling size must be greater than 0. Given {pool_size}."
+        assert pool_size > 0, f"Pooling size must be greater than 0. Given {pool_size}."
         self.pool_size = pool_size
         self.num_classes = num_classes
         self.output_areas = output_areas
@@ -79,23 +106,25 @@ class MultiStreamMouseNet(nn.Module):
             print(f"Using {self.norm_layer} normalization")
 
         # prevent repeats
-        if len(parallel_modules) > 0: # 0 parallel modules still has connection from VISp->*
-            assert(len(list(set(parallel_modules))) == len(parallel_modules))
+        if (
+            len(parallel_modules) > 0
+        ):  # 0 parallel modules still has connection from VISp->*
+            assert len(list(set(parallel_modules))) == len(parallel_modules)
         # prevent repeats
-        assert(len(output_areas) > 0)
-        assert(len(list(set(output_areas))) == len(output_areas))
+        assert len(output_areas) > 0
+        assert len(list(set(output_areas))) == len(output_areas)
         # check that the parallel and output modules are non-overlapping
-        assert(set(output_areas).isdisjoint(set(parallel_modules)))
+        assert set(output_areas).isdisjoint(set(parallel_modules))
         # output areas is always at least one of VISpor or VISam
-        assert(set(output_areas).issubset(set(["VISpor", "VISam"])))
+        assert set(output_areas).issubset(set(["VISpor", "VISam"]))
         if self.single_stream:
             """In this case, even if we have one parallel module, we never create a VISam layer (as we normally would)
             that is left untrained. Partly for memory purposes and partly because DDP does not allow an untrained module."""
 
             # maintains skip connection from VISp->* in the event of 0 parallel modules
-            assert(len(parallel_modules) <= 1)
+            assert len(parallel_modules) <= 1
             # checks that length of outputs is list of 1 and we want it to be VISpor for convenience
-            assert(output_areas == ["VISpor"])
+            assert output_areas == ["VISpor"]
 
         # self.layers will be a dictionary populated with activations mouse_vision/
         # core/feature_extractor.py: CustomFeatureExtractor() uses this convention
@@ -104,7 +133,7 @@ class MultiStreamMouseNet(nn.Module):
         self.layer_names = None
 
         # Set up source-target connections
-        self.model_conns = ["input_VISp"] # input -> VISp
+        self.model_conns = ["input_VISp"]  # input -> VISp
         # VISp -> intermediate
         for parallel_mod in parallel_modules:
             connection = f"VISp_{parallel_mod}"
@@ -130,44 +159,64 @@ class MultiStreamMouseNet(nn.Module):
                         nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
                         build_norm_layer(self.norm_layer, 64)[1],
                         nn.ReLU(inplace=False),
-                        nn.MaxPool2d(kernel_size=3, stride=2,
-                                     return_indices=self.return_maxpool_indices)
+                        nn.MaxPool2d(
+                            kernel_size=3,
+                            stride=2,
+                            return_indices=self.return_maxpool_indices,
+                        ),
                     )
                 else:
                     self.model_layers[conn] = nn.Sequential(
                         nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
                         nn.ReLU(inplace=False),
-                        nn.MaxPool2d(kernel_size=3, stride=2,
-                                     return_indices=self.return_maxpool_indices)
+                        nn.MaxPool2d(
+                            kernel_size=3,
+                            stride=2,
+                            return_indices=self.return_maxpool_indices,
+                        ),
                     )
 
             elif (conn == "VISp_VISpor") or (conn == "VISp_VISam"):
                 if visp_output_pool:
                     if self.norm_layer is not None:
                         self.model_layers[conn] = nn.Sequential(
-                            nn.Conv2d(64, 256, kernel_size=1, stride=1, padding=0), # 1x1 convolution to make spatial sizes match with max pooling
+                            nn.Conv2d(
+                                64, 256, kernel_size=1, stride=1, padding=0
+                            ),  # 1x1 convolution to make spatial sizes match with max pooling
                             build_norm_layer(self.norm_layer, 256)[1],
                             nn.ReLU(inplace=False),
-                            nn.MaxPool2d(kernel_size=3, stride=2,
-                                         return_indices=self.return_maxpool_indices)
+                            nn.MaxPool2d(
+                                kernel_size=3,
+                                stride=2,
+                                return_indices=self.return_maxpool_indices,
+                            ),
                         )
                     else:
                         self.model_layers[conn] = nn.Sequential(
-                            nn.Conv2d(64, 256, kernel_size=1, stride=1, padding=0), # 1x1 convolution to make spatial sizes match with max pooling
+                            nn.Conv2d(
+                                64, 256, kernel_size=1, stride=1, padding=0
+                            ),  # 1x1 convolution to make spatial sizes match with max pooling
                             nn.ReLU(inplace=False),
-                            nn.MaxPool2d(kernel_size=3, stride=2,
-                                         return_indices=self.return_maxpool_indices)
+                            nn.MaxPool2d(
+                                kernel_size=3,
+                                stride=2,
+                                return_indices=self.return_maxpool_indices,
+                            ),
                         )
                 else:
                     if self.norm_layer is not None:
                         self.model_layers[conn] = nn.Sequential(
-                            nn.Conv2d(64, 256, kernel_size=3, stride=2, padding=0), # 3x3 convolution to make spatial sizes match with stride 2
+                            nn.Conv2d(
+                                64, 256, kernel_size=3, stride=2, padding=0
+                            ),  # 3x3 convolution to make spatial sizes match with stride 2
                             build_norm_layer(self.norm_layer, 256)[1],
                             nn.ReLU(inplace=False),
                         )
                     else:
                         self.model_layers[conn] = nn.Sequential(
-                            nn.Conv2d(64, 256, kernel_size=3, stride=2, padding=0), # 3x3 convolution to make spatial sizes match with stride 2
+                            nn.Conv2d(
+                                64, 256, kernel_size=3, stride=2, padding=0
+                            ),  # 3x3 convolution to make spatial sizes match with stride 2
                             nn.ReLU(inplace=False),
                         )
             # Connections to VISpor and VISam
@@ -190,8 +239,11 @@ class MultiStreamMouseNet(nn.Module):
                         nn.Conv2d(64, 192, kernel_size=5, padding=2),
                         build_norm_layer(self.norm_layer, 192)[1],
                         nn.ReLU(inplace=False),
-                        nn.MaxPool2d(kernel_size=3, stride=2,
-                                     return_indices=self.return_maxpool_indices),
+                        nn.MaxPool2d(
+                            kernel_size=3,
+                            stride=2,
+                            return_indices=self.return_maxpool_indices,
+                        ),
                         nn.Conv2d(192, 384, kernel_size=3, padding=1),
                         build_norm_layer(self.norm_layer, 384)[1],
                         nn.ReLU(inplace=False),
@@ -200,8 +252,11 @@ class MultiStreamMouseNet(nn.Module):
                     self.model_layers[conn] = nn.Sequential(
                         nn.Conv2d(64, 192, kernel_size=5, padding=2),
                         nn.ReLU(inplace=False),
-                        nn.MaxPool2d(kernel_size=3, stride=2,
-                                     return_indices=self.return_maxpool_indices),
+                        nn.MaxPool2d(
+                            kernel_size=3,
+                            stride=2,
+                            return_indices=self.return_maxpool_indices,
+                        ),
                         nn.Conv2d(192, 384, kernel_size=3, padding=1),
                         nn.ReLU(inplace=False),
                     )
@@ -213,31 +268,31 @@ class MultiStreamMouseNet(nn.Module):
         # output_areas).
         self.avgpool = nn.AdaptiveAvgPool2d((pool_size, pool_size))
         if drop_final_fc:
-            self.classifier = nn.Sequential(
-                nn.Flatten(start_dim=1),
-            )
+            self.classifier = nn.Sequential(nn.Flatten(start_dim=1),)
         else:
             self.classifier = nn.Sequential(
                 nn.Flatten(start_dim=1),
                 nn.Dropout(),
-                nn.Linear(len(output_areas) * 256 * pool_size * pool_size, num_classes)
+                nn.Linear(len(output_areas) * 256 * pool_size * pool_size, num_classes),
             )
 
     def _get_source_target(self, conn):
-        source_target_pair = conn.split('_')
+        source_target_pair = conn.split("_")
         assert len(source_target_pair) == 2
         source = source_target_pair[0]
         target = source_target_pair[1]
         return source, target
 
-    def _propagate_layer_features(self,
-                                  x,
-                                  set_layer_attrs=True,
-                                  input_names=None,
-                                  model_conns=None,
-                                  model_layers=None,
-                                  decoder_data=None,
-                                  ret_decoder_data=False):
+    def _propagate_layer_features(
+        self,
+        x,
+        set_layer_attrs=True,
+        input_names=None,
+        model_conns=None,
+        model_layers=None,
+        decoder_data=None,
+        ret_decoder_data=False,
+    ):
 
         layers = dict()
         layer_names = list()
@@ -254,7 +309,7 @@ class MultiStreamMouseNet(nn.Module):
         if not isinstance(input_names, list):
             input_names = [input_names]
 
-        assert(set(list(x.keys())) == set(input_names))
+        assert set(list(x.keys())) == set(input_names)
 
         for conn in model_conns:
 
@@ -284,13 +339,16 @@ class MultiStreamMouseNet(nn.Module):
                         curr_out = m(curr_out)
                 elif m.__class__.__name__ == "MaxUnpool2d":
                     cached_unpool_indices = decoder_data[conn]["unpool_idxs"][m_idx]
-                    assert(cached_unpool_indices is not None)
-                    curr_out = m(curr_out,
-                                 indices=cached_unpool_indices,
-                                 output_size=decoder_data[conn]["output_sizes"][m_idx])
+                    assert cached_unpool_indices is not None
+                    curr_out = m(
+                        curr_out,
+                        indices=cached_unpool_indices,
+                        output_size=decoder_data[conn]["output_sizes"][m_idx],
+                    )
                 elif m.__class__.__name__ == "ConvTranspose2d":
-                    curr_out = m(curr_out,
-                                 output_size=decoder_data[conn]["output_sizes"][m_idx])
+                    curr_out = m(
+                        curr_out, output_size=decoder_data[conn]["output_sizes"][m_idx]
+                    )
                 else:
                     curr_out = m(curr_out)
 
@@ -298,12 +356,14 @@ class MultiStreamMouseNet(nn.Module):
 
             if ret_decoder_data:
                 # applied in reverse order in autoencoder
-                decoder_data[target + '_' + source] = {"unpool_idxs": unpool_idxs[::-1],
-                                                       "output_sizes": decoder_output_sizes[::-1]}
+                decoder_data[target + "_" + source] = {
+                    "unpool_idxs": unpool_idxs[::-1],
+                    "output_sizes": decoder_output_sizes[::-1],
+                }
 
             if target not in layers.keys():
                 layers[target] = curr_out
-            else: # Add inputs from each source module of the target module
+            else:  # Add inputs from each source module of the target module
                 layers[target] += curr_out
 
             if target not in layer_names:
@@ -330,7 +390,7 @@ class MultiStreamMouseNet(nn.Module):
 
                 concat_module_output = torch.cat(
                     [concat_module_output, self.layers[out_area]],
-                    axis=1 # channels is the first axis (N, C, H, W)
+                    axis=1,  # channels is the first axis (N, C, H, W)
                 )
 
         return concat_module_output
@@ -350,21 +410,20 @@ class MultiStreamMouseNet(nn.Module):
         output = self.classifier(output)
         return output
 
+
 class MultiStreamMouseNetAE(MultiStreamMouseNet):
     """
     Implementation of the AutoEncoder version of the MultiStreamMouseNet.
     Arguments same as above, except for embedding dim.
     """
-    def __init__(
-        self,
-        embedding_dim=128,
-        compress=True,
-        **kwargs
-    ):
+
+    def __init__(self, embedding_dim=128, compress=True, **kwargs):
         super(MultiStreamMouseNetAE, self).__init__(**kwargs)
 
         self.embedding_dim = embedding_dim
-        self.encoder_feats = len(self.output_areas) * 256 * self.pool_size * self.pool_size
+        self.encoder_feats = (
+            len(self.output_areas) * 256 * self.pool_size * self.pool_size
+        )
 
         if compress:
             self.compress_fc = nn.Linear(self.encoder_feats, self.embedding_dim)
@@ -380,22 +439,24 @@ class MultiStreamMouseNetAE(MultiStreamMouseNet):
         for conn in self.model_conns[::-1]:
             curr_block = self.model_layers[conn]
             source, target = self._get_source_target(conn)
-            decoder_conn = target + '_' + source
+            decoder_conn = target + "_" + source
             self.decoder_conns.append(decoder_conn)
 
             decoder_modules = []
             # traverse the operations in reverse order
             for m in reversed(curr_block):
                 if m.__class__.__name__ == "Conv2d":
-                    curr_op = nn.ConvTranspose2d(in_channels=m.out_channels,
-                                                 out_channels=m.in_channels,
-                                                 kernel_size=m.kernel_size,
-                                                 stride=m.stride,
-                                                 padding=m.padding)
+                    curr_op = nn.ConvTranspose2d(
+                        in_channels=m.out_channels,
+                        out_channels=m.in_channels,
+                        kernel_size=m.kernel_size,
+                        stride=m.stride,
+                        padding=m.padding,
+                    )
                 elif m.__class__.__name__ == "MaxPool2d":
-                    curr_op = nn.MaxUnpool2d(kernel_size=m.kernel_size,
-                                             stride=m.stride,
-                                             padding=m.padding)
+                    curr_op = nn.MaxUnpool2d(
+                        kernel_size=m.kernel_size, stride=m.stride, padding=m.padding
+                    )
                 else:
                     curr_op = copy.deepcopy(m)
 
@@ -406,9 +467,7 @@ class MultiStreamMouseNetAE(MultiStreamMouseNet):
     def forward(self, x):
         # First compute the activations for each module
         self.layers, self.layer_names, decoder_data = self._propagate_layer_features(
-            {"input": x},
-            set_layer_attrs=False,
-            ret_decoder_data=True
+            {"input": x}, set_layer_attrs=False, ret_decoder_data=True
         )
 
         # Concatenate the outputs for the desired output areas
@@ -428,12 +487,13 @@ class MultiStreamMouseNetAE(MultiStreamMouseNet):
         output = self.decompress_fc(compress_output)
 
         # sanity check
-        assert(output.shape[-1] == np.prod(encoder_output.shape[1:]))
+        assert output.shape[-1] == np.prod(encoder_output.shape[1:])
 
         output = output.reshape(
             output.shape[0],
             len(self.output_areas) * 256,
-            self.pool_size, self.pool_size
+            self.pool_size,
+            self.pool_size,
         )
 
         # avg pool does nearest neighbor resize when input < pool size and avgpool when input > pool size
@@ -445,7 +505,9 @@ class MultiStreamMouseNetAE(MultiStreamMouseNet):
 
         decoder_x = {}
         for output_area_idx, output_area in enumerate(self.output_areas):
-            decoder_x[output_area] = output[:, output_area_idx*256:(output_area_idx+1)*256, :, :]
+            decoder_x[output_area] = output[
+                :, output_area_idx * 256 : (output_area_idx + 1) * 256, :, :
+            ]
 
         self.decoder_outputs, _ = self._propagate_layer_features(
             decoder_x,
@@ -453,13 +515,13 @@ class MultiStreamMouseNetAE(MultiStreamMouseNet):
             input_names=self.output_areas,
             model_conns=self.decoder_conns,
             model_layers=self.decoder_layers,
-            decoder_data=decoder_data
+            decoder_data=decoder_data,
         )
 
         return {
             "output": self.decoder_outputs["input"],
             "hidden_vec": compress_output,
-            "encoder_output": encoder_output
+            "encoder_output": encoder_output,
         }
 
 
@@ -467,8 +529,11 @@ class MultiStreamMouseNetDepthHourGlass(MultiStreamMouseNetAE):
     """
     Implementation of the hour-glass version of the MultiStreamMouseNet.
     """
+
     def __init__(self, **kwargs):
-        super(MultiStreamMouseNetDepthHourGlass, self).__init__(compress=False, **kwargs)
+        super(MultiStreamMouseNetDepthHourGlass, self).__init__(
+            compress=False, **kwargs
+        )
 
 
 def simplified_mousenet_six_stream(pretrained=False, **kwargs):
@@ -484,7 +549,7 @@ def simplified_mousenet_six_stream(pretrained=False, **kwargs):
         output_areas=["VISpor", "VISam"],
         visp_output_pool=True,
         pool_size=6,
-        **kwargs
+        **kwargs,
     )
 
     return model
@@ -504,7 +569,7 @@ def simplified_mousenet_six_stream_visp_3x3(pretrained=False, **kwargs):
         output_areas=["VISpor", "VISam"],
         visp_output_pool=False,
         pool_size=6,
-        **kwargs
+        **kwargs,
     )
 
     return model
@@ -523,10 +588,11 @@ def simplified_mousenet_six_stream_vispor_only(pretrained=False, **kwargs):
         output_areas=["VISpor"],
         visp_output_pool=True,
         pool_size=6,
-        **kwargs
+        **kwargs,
     )
 
     return model
+
 
 def simplified_mousenet_six_stream_vispor_only_visp_3x3(pretrained=False, **kwargs):
     """
@@ -542,10 +608,11 @@ def simplified_mousenet_six_stream_vispor_only_visp_3x3(pretrained=False, **kwar
         output_areas=["VISpor"],
         visp_output_pool=False,
         pool_size=6,
-        **kwargs
+        **kwargs,
     )
 
     return model
+
 
 def simplified_mousenet_dual_stream(pretrained=False, **kwargs):
     """
@@ -559,10 +626,11 @@ def simplified_mousenet_dual_stream(pretrained=False, **kwargs):
         output_areas=["VISpor", "VISam"],
         visp_output_pool=True,
         pool_size=6,
-        **kwargs
+        **kwargs,
     )
 
     return model
+
 
 def simplified_mousenet_dual_stream_visp_3x3(pretrained=False, **kwargs):
     """
@@ -577,10 +645,11 @@ def simplified_mousenet_dual_stream_visp_3x3(pretrained=False, **kwargs):
         output_areas=["VISpor", "VISam"],
         visp_output_pool=False,
         pool_size=6,
-        **kwargs
+        **kwargs,
     )
 
     return model
+
 
 def simplified_mousenet_dual_stream_vispor_only(pretrained=False, **kwargs):
     """
@@ -594,10 +663,11 @@ def simplified_mousenet_dual_stream_vispor_only(pretrained=False, **kwargs):
         output_areas=["VISpor"],
         visp_output_pool=True,
         pool_size=6,
-        **kwargs
+        **kwargs,
     )
 
     return model
+
 
 def simplified_mousenet_dual_stream_vispor_only_visp_3x3(pretrained=False, **kwargs):
     """
@@ -612,13 +682,13 @@ def simplified_mousenet_dual_stream_vispor_only_visp_3x3(pretrained=False, **kwa
         output_areas=["VISpor"],
         visp_output_pool=False,
         pool_size=6,
-        **kwargs
+        **kwargs,
     )
 
     return model
 
-def simplified_mousenet_single_stream_base(pretrained=False,
-                                           **kwargs):
+
+def simplified_mousenet_single_stream_base(pretrained=False, **kwargs):
     """
     Simplified MouseNet architecture with one stream: used for trying out different tasks.
     Outputs from VISp are processed with a 3x3 convolution (stride 2) before VISpor layer.
@@ -631,264 +701,263 @@ def simplified_mousenet_single_stream_base(pretrained=False,
         visp_output_pool=False,
         pool_size=6,
         single_stream=True,
-        **kwargs
+        **kwargs,
     )
 
     return model
 
-def simplified_mousenet_single_stream(pretrained=False,
-                                               **kwargs):
 
-    return simplified_mousenet_single_stream_base(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  **kwargs)
+def simplified_mousenet_single_stream(pretrained=False, **kwargs):
 
-def simplified_mousenet_single_stream_rand(pretrained=False,
-                                              **kwargs):
+    return simplified_mousenet_single_stream_base(
+        pretrained=pretrained, norm_layer=dict(type="BN"), **kwargs
+    )
+
+
+def simplified_mousenet_single_stream_rand(pretrained=False, **kwargs):
 
     """We set drop_final_fc=True to train finetune linear layer off of it later."""
-    return simplified_mousenet_single_stream_base(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_single_stream_base(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-def simplified_mousenet_single_stream_ir(pretrained=False,
-                                              **kwargs):
 
-    return simplified_mousenet_single_stream_base(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+def simplified_mousenet_single_stream_ir(pretrained=False, **kwargs):
 
-def simplified_mousenet_single_stream_ir_224x224(pretrained=False,
-                                              **kwargs):
+    return simplified_mousenet_single_stream_base(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-    return simplified_mousenet_single_stream_base(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
 
-def simplified_mousenet_single_stream_rotnet(pretrained=False,
-                                              **kwargs):
+def simplified_mousenet_single_stream_ir_224x224(pretrained=False, **kwargs):
 
-    return simplified_mousenet_single_stream_base(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_single_stream_base(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-def simplified_mousenet_single_stream_mocov2(pretrained=False,
-                                              **kwargs):
 
-    return simplified_mousenet_single_stream_base(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+def simplified_mousenet_single_stream_rotnet(pretrained=False, **kwargs):
 
-def simplified_mousenet_single_stream_simclr(pretrained=False,
-                                              **kwargs):
+    return simplified_mousenet_single_stream_base(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-    return simplified_mousenet_single_stream_base(pretrained=pretrained,
-                                                  norm_layer=dict(type="SyncBN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
 
-def simplified_mousenet_single_stream_simsiam(pretrained=False,
-                                              **kwargs):
+def simplified_mousenet_single_stream_mocov2(pretrained=False, **kwargs):
 
-    return simplified_mousenet_single_stream_base(pretrained=pretrained,
-                                                  norm_layer=dict(type="SyncBN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_single_stream_base(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-def simplified_mousenet_dual_stream_visp_3x3_bn(pretrained=False,
-                                               **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  **kwargs)
+def simplified_mousenet_single_stream_simclr(pretrained=False, **kwargs):
 
-def simplified_mousenet_dual_stream_visp_3x3_bn_rand(pretrained=False,
-                                               **kwargs):
+    return simplified_mousenet_single_stream_base(
+        pretrained=pretrained,
+        norm_layer=dict(type="SyncBN"),
+        drop_final_fc=True,
+        **kwargs,
+    )
+
+
+def simplified_mousenet_single_stream_simsiam(pretrained=False, **kwargs):
+
+    return simplified_mousenet_single_stream_base(
+        pretrained=pretrained,
+        norm_layer=dict(type="SyncBN"),
+        drop_final_fc=True,
+        **kwargs,
+    )
+
+
+def simplified_mousenet_dual_stream_visp_3x3_bn(pretrained=False, **kwargs):
+
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), **kwargs
+    )
+
+
+def simplified_mousenet_dual_stream_visp_3x3_bn_rand(pretrained=False, **kwargs):
     """We set drop_final_fc=True to train finetune linear layer off of it later."""
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
+
 
 def simplified_mousenet_dual_stream_visp_3x3_ir_32x32(pretrained=False, **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
+
 
 def simplified_mousenet_dual_stream_visp_3x3_ir_44x44(pretrained=False, **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-def simplified_mousenet_dual_stream_visp_3x3_ir(pretrained=False,
-                                              **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+def simplified_mousenet_dual_stream_visp_3x3_ir(pretrained=False, **kwargs):
+
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
+
 
 def simplified_mousenet_dual_stream_visp_3x3_ir_84x84(pretrained=False, **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
+
 
 def simplified_mousenet_dual_stream_visp_3x3_ir_104x104(pretrained=False, **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
+
 
 def simplified_mousenet_dual_stream_visp_3x3_ir_124x124(pretrained=False, **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
+
 
 def simplified_mousenet_dual_stream_visp_3x3_ir_144x144(pretrained=False, **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
+
 
 def simplified_mousenet_dual_stream_visp_3x3_ir_164x164(pretrained=False, **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
+
 
 def simplified_mousenet_dual_stream_visp_3x3_ir_184x184(pretrained=False, **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
+
 
 def simplified_mousenet_dual_stream_visp_3x3_ir_204x204(pretrained=False, **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
+
 
 def simplified_mousenet_dual_stream_visp_3x3_ir_224x224(pretrained=False, **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-def simplified_mousenet_dual_stream_visp_3x3_rotnet(pretrained=False,
-                                              **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+def simplified_mousenet_dual_stream_visp_3x3_rotnet(pretrained=False, **kwargs):
 
-def simplified_mousenet_dual_stream_visp_3x3_mocov2(pretrained=False,
-                                              **kwargs):
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
 
-def simplified_mousenet_dual_stream_visp_3x3_simclr(pretrained=False,
-                                              **kwargs):
+def simplified_mousenet_dual_stream_visp_3x3_mocov2(pretrained=False, **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="SyncBN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-def simplified_mousenet_dual_stream_visp_3x3_simsiam(pretrained=False,
-                                              **kwargs):
 
-    return simplified_mousenet_dual_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="SyncBN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+def simplified_mousenet_dual_stream_visp_3x3_simclr(pretrained=False, **kwargs):
 
-def simplified_mousenet_six_stream_visp_3x3_bn(pretrained=False,
-                                               **kwargs):
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained,
+        norm_layer=dict(type="SyncBN"),
+        drop_final_fc=True,
+        **kwargs,
+    )
 
-    return simplified_mousenet_six_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  **kwargs)
 
-def simplified_mousenet_six_stream_visp_3x3_bn_rand(pretrained=False,
-                                               **kwargs):
+def simplified_mousenet_dual_stream_visp_3x3_simsiam(pretrained=False, **kwargs):
+
+    return simplified_mousenet_dual_stream_visp_3x3(
+        pretrained=pretrained,
+        norm_layer=dict(type="SyncBN"),
+        drop_final_fc=True,
+        **kwargs,
+    )
+
+
+def simplified_mousenet_six_stream_visp_3x3_bn(pretrained=False, **kwargs):
+
+    return simplified_mousenet_six_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), **kwargs
+    )
+
+
+def simplified_mousenet_six_stream_visp_3x3_bn_rand(pretrained=False, **kwargs):
     """We set drop_final_fc=True to train finetune linear layer off of it later."""
-    return simplified_mousenet_six_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_six_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-def simplified_mousenet_six_stream_visp_3x3_ir(pretrained=False,
-                                              **kwargs):
 
-    return simplified_mousenet_six_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+def simplified_mousenet_six_stream_visp_3x3_ir(pretrained=False, **kwargs):
+
+    return simplified_mousenet_six_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
+
 
 def simplified_mousenet_six_stream_visp_3x3_ir_224x224(pretrained=False, **kwargs):
 
-    return simplified_mousenet_six_stream_visp_3x3(pretrained=pretrained, 
-                                                    norm_layer=dict(type="BN"), 
-                                                    drop_final_fc=True, 
-                                                    **kwargs)
+    return simplified_mousenet_six_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-def simplified_mousenet_six_stream_visp_3x3_rotnet(pretrained=False,
-                                              **kwargs):
 
-    return simplified_mousenet_six_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+def simplified_mousenet_six_stream_visp_3x3_rotnet(pretrained=False, **kwargs):
 
-def simplified_mousenet_six_stream_visp_3x3_mocov2(pretrained=False,
-                                              **kwargs):
+    return simplified_mousenet_six_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-    return simplified_mousenet_six_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="BN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
 
-def simplified_mousenet_six_stream_visp_3x3_simclr(pretrained=False,
-                                              **kwargs):
+def simplified_mousenet_six_stream_visp_3x3_mocov2(pretrained=False, **kwargs):
 
-    return simplified_mousenet_six_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="SyncBN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+    return simplified_mousenet_six_stream_visp_3x3(
+        pretrained=pretrained, norm_layer=dict(type="BN"), drop_final_fc=True, **kwargs
+    )
 
-def simplified_mousenet_six_stream_visp_3x3_simsiam(pretrained=False,
-                                              **kwargs):
 
-    return simplified_mousenet_six_stream_visp_3x3(pretrained=pretrained,
-                                                  norm_layer=dict(type="SyncBN"),
-                                                  drop_final_fc=True,
-                                                  **kwargs)
+def simplified_mousenet_six_stream_visp_3x3_simclr(pretrained=False, **kwargs):
 
-def simplified_mousenet_ae_single_stream(pretrained=False,
-                                           **kwargs):
+    return simplified_mousenet_six_stream_visp_3x3(
+        pretrained=pretrained,
+        norm_layer=dict(type="SyncBN"),
+        drop_final_fc=True,
+        **kwargs,
+    )
+
+
+def simplified_mousenet_six_stream_visp_3x3_simsiam(pretrained=False, **kwargs):
+
+    return simplified_mousenet_six_stream_visp_3x3(
+        pretrained=pretrained,
+        norm_layer=dict(type="SyncBN"),
+        drop_final_fc=True,
+        **kwargs,
+    )
+
+
+def simplified_mousenet_ae_single_stream(pretrained=False, **kwargs):
     """
     Simplified MouseNet AutoEncoder with one stream.
     """
@@ -901,10 +970,11 @@ def simplified_mousenet_ae_single_stream(pretrained=False,
         norm_layer=dict(type="BN"),
         drop_final_fc=True,
         return_maxpool_indices=True,
-        **kwargs
+        **kwargs,
     )
 
     return model
+
 
 def simplified_mousenet_ae_dual_stream(pretrained=False, **kwargs):
     """
@@ -918,10 +988,11 @@ def simplified_mousenet_ae_dual_stream(pretrained=False, **kwargs):
         norm_layer=dict(type="BN"),
         drop_final_fc=True,
         return_maxpool_indices=True,
-        **kwargs
+        **kwargs,
     )
 
     return model
+
 
 def simplified_mousenet_ae_six_stream(pretrained=False, **kwargs):
     """
@@ -935,10 +1006,11 @@ def simplified_mousenet_ae_six_stream(pretrained=False, **kwargs):
         norm_layer=dict(type="BN"),
         drop_final_fc=True,
         return_maxpool_indices=True,
-        **kwargs
+        **kwargs,
     )
 
     return model
+
 
 def simplified_mousenet_depth_hour_glass_single_stream(pretrained=False, **kwargs):
     """
@@ -953,10 +1025,11 @@ def simplified_mousenet_depth_hour_glass_single_stream(pretrained=False, **kwarg
         norm_layer=dict(type="BN"),
         drop_final_fc=True,
         return_maxpool_indices=True,
-        **kwargs
+        **kwargs,
     )
 
     return model
+
 
 def simplified_mousenet_depth_hour_glass_dual_stream(pretrained=False, **kwargs):
     """
@@ -970,10 +1043,11 @@ def simplified_mousenet_depth_hour_glass_dual_stream(pretrained=False, **kwargs)
         norm_layer=dict(type="BN"),
         drop_final_fc=True,
         return_maxpool_indices=True,
-        **kwargs
+        **kwargs,
     )
 
     return model
+
 
 def simplified_mousenet_depth_hour_glass_six_stream(pretrained=False, **kwargs):
     """
@@ -987,10 +1061,11 @@ def simplified_mousenet_depth_hour_glass_six_stream(pretrained=False, **kwargs):
         norm_layer=dict(type="BN"),
         drop_final_fc=True,
         return_maxpool_indices=True,
-        **kwargs
+        **kwargs,
     )
 
     return model
+
 
 if __name__ == "__main__":
 

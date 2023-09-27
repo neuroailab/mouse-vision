@@ -5,17 +5,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.jit.annotations import Optional
 from torch import Tensor
-from torchvision.models.utils import load_state_dict_from_url
+from torch.hub import load_state_dict_from_url
 
-__all__ = ['Inception3', 'inception_v3', 'InceptionOutputs', '_InceptionOutputs']
+__all__ = ["Inception3", "inception_v3", "InceptionOutputs", "_InceptionOutputs"]
 
 model_urls = {
     # Inception v3 ported from TensorFlow
-    'inception_v3_google': 'https://download.pytorch.org/models/inception_v3_google-1a9a5a14.pth',
+    "inception_v3_google": "https://download.pytorch.org/models/inception_v3_google-1a9a5a14.pth",
 }
 
-InceptionOutputs = namedtuple('InceptionOutputs', ['logits', 'aux_logits'])
-InceptionOutputs.__annotations__ = {'logits': torch.Tensor, 'aux_logits': Optional[torch.Tensor]}
+InceptionOutputs = namedtuple("InceptionOutputs", ["logits", "aux_logits"])
+InceptionOutputs.__annotations__ = {
+    "logits": torch.Tensor,
+    "aux_logits": Optional[torch.Tensor],
+}
 
 # Script annotations failed with _GoogleNetOutputs = namedtuple ...
 # _InceptionOutputs set here for backwards compat
@@ -37,17 +40,18 @@ def inception_v3(pretrained=False, progress=True, **kwargs):
             was trained on ImageNet. Default: *False*
     """
     if pretrained:
-        if 'transform_input' not in kwargs:
-            kwargs['transform_input'] = True
-        if 'aux_logits' in kwargs:
-            original_aux_logits = kwargs['aux_logits']
-            kwargs['aux_logits'] = True
+        if "transform_input" not in kwargs:
+            kwargs["transform_input"] = True
+        if "aux_logits" in kwargs:
+            original_aux_logits = kwargs["aux_logits"]
+            kwargs["aux_logits"] = True
         else:
             original_aux_logits = True
-        kwargs['init_weights'] = False  # we are loading weights from a pretrained model
+        kwargs["init_weights"] = False  # we are loading weights from a pretrained model
         model = Inception3(**kwargs)
-        state_dict = load_state_dict_from_url(model_urls['inception_v3_google'],
-                                              progress=progress)
+        state_dict = load_state_dict_from_url(
+            model_urls["inception_v3_google"], progress=progress
+        )
         model.load_state_dict(state_dict)
         if not original_aux_logits:
             model.aux_logits = False
@@ -58,19 +62,33 @@ def inception_v3(pretrained=False, progress=True, **kwargs):
 
 
 class Inception3(nn.Module):
-
-    def __init__(self, num_classes=1000, aux_logits=True, transform_input=False,
-                 inception_blocks=None, init_weights=None, drop_final_fc=False):
+    def __init__(
+        self,
+        num_classes=1000,
+        aux_logits=True,
+        transform_input=False,
+        inception_blocks=None,
+        init_weights=None,
+        drop_final_fc=False,
+    ):
         super(Inception3, self).__init__()
         if inception_blocks is None:
             inception_blocks = [
-                BasicConv2d, InceptionA, InceptionB, InceptionC,
-                InceptionD, InceptionE, InceptionAux
+                BasicConv2d,
+                InceptionA,
+                InceptionB,
+                InceptionC,
+                InceptionD,
+                InceptionE,
+                InceptionAux,
             ]
         if init_weights is None:
-            warnings.warn('The default weight initialization of inception_v3 will be changed in future releases of '
-                          'torchvision. If you wish to keep the old behavior (which leads to long initialization times'
-                          ' due to scipy/scipy#11299), please set init_weights=True.', FutureWarning)
+            warnings.warn(
+                "The default weight initialization of inception_v3 will be changed in future releases of "
+                "torchvision. If you wish to keep the old behavior (which leads to long initialization times"
+                " due to scipy/scipy#11299), please set init_weights=True.",
+                FutureWarning,
+            )
             init_weights = True
         assert len(inception_blocks) == 7
         conv_block = inception_blocks[0]
@@ -114,9 +132,12 @@ class Inception3(nn.Module):
             for m in self.modules():
                 if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
                     import scipy.stats as stats
-                    stddev = m.stddev if hasattr(m, 'stddev') else 0.1
+
+                    stddev = m.stddev if hasattr(m, "stddev") else 0.1
                     X = stats.truncnorm(-2, 2, scale=stddev)
-                    values = torch.as_tensor(X.rvs(m.weight.numel()), dtype=m.weight.dtype)
+                    values = torch.as_tensor(
+                        X.rvs(m.weight.numel()), dtype=m.weight.dtype
+                    )
                     values = values.view(m.weight.size())
                     with torch.no_grad():
                         m.weight.copy_(values)
@@ -207,7 +228,6 @@ class Inception3(nn.Module):
 
 
 class InceptionA(nn.Module):
-
     def __init__(self, in_channels, pool_features, conv_block=None):
         super(InceptionA, self).__init__()
         if conv_block is None:
@@ -245,7 +265,6 @@ class InceptionA(nn.Module):
 
 
 class InceptionB(nn.Module):
-
     def __init__(self, in_channels, conv_block=None):
         super(InceptionB, self).__init__()
         if conv_block is None:
@@ -274,7 +293,6 @@ class InceptionB(nn.Module):
 
 
 class InceptionC(nn.Module):
-
     def __init__(self, in_channels, channels_7x7, conv_block=None):
         super(InceptionC, self).__init__()
         if conv_block is None:
@@ -319,7 +337,6 @@ class InceptionC(nn.Module):
 
 
 class InceptionD(nn.Module):
-
     def __init__(self, in_channels, conv_block=None):
         super(InceptionD, self).__init__()
         if conv_block is None:
@@ -351,7 +368,6 @@ class InceptionD(nn.Module):
 
 
 class InceptionE(nn.Module):
-
     def __init__(self, in_channels, conv_block=None):
         super(InceptionE, self).__init__()
         if conv_block is None:
@@ -399,7 +415,6 @@ class InceptionE(nn.Module):
 
 
 class InceptionAux(nn.Module):
-
     def __init__(self, in_channels, num_classes, conv_block=None):
         super(InceptionAux, self).__init__()
         if conv_block is None:
@@ -429,7 +444,6 @@ class InceptionAux(nn.Module):
 
 
 class BasicConv2d(nn.Module):
-
     def __init__(self, in_channels, out_channels, **kwargs):
         super(BasicConv2d, self).__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, bias=False, **kwargs)
@@ -439,5 +453,3 @@ class BasicConv2d(nn.Module):
         x = self.conv(x)
         x = self.bn(x)
         return F.relu(x, inplace=True)
-
-

@@ -81,7 +81,9 @@ class InstanceDiscriminationLoss(LossFunctionBase):
                 batch_size, m = idxs.shape
                 _idxs = idxs.view(-1)
                 memory_embeddings = torch.index_select(self.memory_bank, 0, _idxs)
-                memory_embeddings = memory_embeddings.view(batch_size, m, self.memory_bank.size(1))
+                memory_embeddings = memory_embeddings.view(
+                    batch_size, m, self.memory_bank.size(1)
+                )
 
             # Important! Outside of torch.no_grad() space
             embeddings = embeddings.view(batch_size, 1, -1)
@@ -167,7 +169,12 @@ class InstanceDiscriminationLoss(LossFunctionBase):
         data_loss = -(torch.sum(log_data_prob)) / batch_size
         noise_loss = -(torch.sum(log_noise_prob)) / batch_size
 
-        return loss.unsqueeze(0), entries_to_update, data_loss.unsqueeze(0), noise_loss.unsqueeze(0)
+        return (
+            loss.unsqueeze(0),
+            entries_to_update,
+            data_loss.unsqueeze(0),
+            noise_loss.unsqueeze(0),
+        )
 
 
 if __name__ == "__main__":
@@ -187,4 +194,3 @@ if __name__ == "__main__":
 
     print(list(loss_func.parameters())[0].shape)
     print(list(loss_func.parameters())[0].requires_grad)
-

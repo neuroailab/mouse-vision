@@ -2,6 +2,7 @@ import torch.nn as nn
 
 __all__ = ["LossFunctionBase"]
 
+
 class LossFunctionBase(nn.Module):
     def __init__(self):
         super(LossFunctionBase, self).__init__()
@@ -27,4 +28,3 @@ class LossFunctionBase(nn.Module):
             preds  : (torch.Tensor) (N, K); model predictions for K classes
         """
         raise NotImplementedError
-

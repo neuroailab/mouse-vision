@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
 
-__all__ = ['AlexNetTwo', 'alexnet_two_64x64']
+__all__ = ["AlexNetTwo", "alexnet_two_64x64"]
+
 
 class AlexNetTwo(nn.Module):
-
     def __init__(self, num_classes=1000, pool_size=6):
         super(AlexNetTwo, self).__init__()
 
@@ -20,8 +20,7 @@ class AlexNetTwo(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((pool_size, pool_size))
 
         self.classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Linear(192 * pool_size * pool_size, num_classes),
+            nn.Dropout(), nn.Linear(192 * pool_size * pool_size, num_classes),
         )
 
     def forward(self, x):
@@ -40,5 +39,3 @@ def alexnet_two_64x64(pretrained=False, **kwargs):
     model = AlexNetTwo(**kwargs)
 
     return model
-
-

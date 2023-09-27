@@ -21,4 +21,3 @@ class DepthPredictionHourGlassLoss(LossFunctionBase):
         depth_pred = self.decoder(x)
         loss = 0.5 * self.loss(depth_pred, output)
         return loss
-

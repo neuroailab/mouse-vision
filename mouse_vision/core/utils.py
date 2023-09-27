@@ -1,6 +1,8 @@
 import os
 import pickle
 from itertools import product
+import pandas as pd
+
 
 def open_dataset(filepath):
     """
@@ -13,19 +15,25 @@ def open_dataset(filepath):
         data : (xarray.DataArray) data structure
     """
     if os.path.isfile(filepath):
-        data = pickle.load(open(filepath, "rb"))
+        if pd.__version__ >= "1.0":
+            data = pd.read_pickle(open(filepath, "rb"))
+        else:
+            data = pickle.load(open(filepath, "rb"))
         return data
     else:
         raise ValueError(f"{filepath} is not a file or does not exist.")
 
+
 def dict_to_str(adict):
-    '''Converts a dictionary (e.g. hyperparameter configuration) into a string'''
-    return ''.join('{}{}'.format(key, val) for key, val in sorted(adict.items()))
+    """Converts a dictionary (e.g. hyperparameter configuration) into a string"""
+    return "".join("{}{}".format(key, val) for key, val in sorted(adict.items()))
+
 
 def iterate_dicts(inp):
-    '''Computes cartesian product of parameters
-    From: https://stackoverflow.com/questions/10472907/how-to-convert-dictionary-into-string'''
+    """Computes cartesian product of parameters
+    From: https://stackoverflow.com/questions/10472907/how-to-convert-dictionary-into-string"""
     return list((dict(zip(inp.keys(), values)) for values in product(*inp.values())))
+
 
 def get_params_from_workernum(worker_num, param_lookup, group_idx=None):
     if group_idx is None:
@@ -36,6 +44,7 @@ def get_params_from_workernum(worker_num, param_lookup, group_idx=None):
         worker_num = int(worker_num) + (1000 * group_idx)
         worker_num = str(worker_num)
         return param_lookup[worker_num]
+
 
 def get_base_arch_name(model_name):
     """

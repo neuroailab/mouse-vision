@@ -6,6 +6,7 @@ import torch.nn.functional as F
 
 __all__ = ["GaussianBlur"]
 
+
 def _get_gaussian_kernel1d(kernel_size, sigma):
     """
     Computes the one-dimensional Gaussian.
@@ -25,6 +26,7 @@ def _get_gaussian_kernel1d(kernel_size, sigma):
 
     return kernel1d
 
+
 def _get_gaussian_kernel2d(kernel_size, sigma, dtype, device):
     """
     Computes outer-product of two one-dimensional Gaussians to get the two-dimensional
@@ -37,11 +39,16 @@ def _get_gaussian_kernel2d(kernel_size, sigma, dtype, device):
     Outputs:
         kernel2d    : (torch.Tensor) for the two-dimensional Gaussian kernel
     """
-    kernel1d_x = _get_gaussian_kernel1d(kernel_size[0], sigma[0]).to(device, dtype=dtype)
-    kernel1d_y = _get_gaussian_kernel1d(kernel_size[1], sigma[1]).to(device, dtype=dtype)
-    kernel2d = torch.mm(kernel1d_y[:, None], kernel1d_x[None, :]) # outer product
+    kernel1d_x = _get_gaussian_kernel1d(kernel_size[0], sigma[0]).to(
+        device, dtype=dtype
+    )
+    kernel1d_y = _get_gaussian_kernel1d(kernel_size[1], sigma[1]).to(
+        device, dtype=dtype
+    )
+    kernel2d = torch.mm(kernel1d_y[:, None], kernel1d_x[None, :])  # outer product
 
     return kernel2d
+
 
 def _gaussian_blur(img, kernel_size, sigma):
     """
@@ -56,14 +63,21 @@ def _gaussian_blur(img, kernel_size, sigma):
     n_channel = img.shape[0]
     orig_height = img.shape[1]
     orig_width = img.shape[2]
-    img = img.unsqueeze(0) # unsqueeze first dimension since reflection pad only works for 4D tensors
+    img = img.unsqueeze(
+        0
+    )  # unsqueeze first dimension since reflection pad only works for 4D tensors
 
     dtype = img.dtype if torch.is_floating_point(img) else torch.float32
     kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device)
     kernel = kernel.expand(img.shape[-3], 1, kernel.shape[0], kernel.shape[1])
 
     # padding = (left, right, top, bottom)
-    padding = [kernel_size[0] // 2, kernel_size[0] // 2, kernel_size[1] // 2, kernel_size[1] // 2]
+    padding = [
+        kernel_size[0] // 2,
+        kernel_size[0] // 2,
+        kernel_size[1] // 2,
+        kernel_size[1] // 2,
+    ]
     img = F.pad(img, padding, mode="reflect")
 
     new_height = orig_height + (2 * (kernel_size[1] // 2))
@@ -74,6 +88,7 @@ def _gaussian_blur(img, kernel_size, sigma):
     img = img.squeeze(0)
     return img
 
+
 class GaussianBlur(nn.Module):
     """
     Class for performing Gaussian blur.
@@ -82,12 +97,15 @@ class GaussianBlur(nn.Module):
         kernel_size : (int) size of kernel, assumes square kernel
         sigma       : (float) size of standard deviation for Gaussian
     """
+
     def __init__(self, kernel_size, sigma):
         super(GaussianBlur, self).__init__()
         assert isinstance(kernel_size, numbers.Number)
         if kernel_size <= 0 or kernel_size % 2 == 0:
-            raise ValueError(f"Kernel size value should be an odd and "
-                             f"positive number. Given {kernel_size}.")
+            raise ValueError(
+                f"Kernel size value should be an odd and "
+                f"positive number. Given {kernel_size}."
+            )
         self.kernel_size = (kernel_size, kernel_size)
 
         assert isinstance(sigma, numbers.Number)
@@ -99,5 +117,3 @@ class GaussianBlur(nn.Module):
         assert isinstance(x, torch.Tensor)
         blur_x = _gaussian_blur(x, self.kernel_size, self.sigma)
         return blur_x
-
-

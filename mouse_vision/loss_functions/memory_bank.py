@@ -5,7 +5,8 @@ import torch.distributed as dist
 
 from mouse_vision.loss_functions.loss_utils import l2_normalize
 
-class MemoryBank():
+
+class MemoryBank:
     def __init__(self, num_samples, dimension, device):
         # Device: could be TPU/GPU device
         self.device = device
@@ -16,7 +17,7 @@ class MemoryBank():
 
         # Initialize memory bank and then broadcast it to the other processes
         # from the source process (whose rank is 0)
-        if self.device.type == "xla": # TPU
+        if self.device.type == "xla":  # TPU
             import torch_xla.core.xla_model as xm
 
             # If rank is 0, then get a random initialization, otherwise
@@ -52,9 +53,7 @@ class MemoryBank():
         assert isinstance(self.memory_bank, torch.Tensor)
 
         assert self.memory_bank.shape[1] == embeddings.shape[1]
-        inner_prods = torch.matmul(
-            embeddings, torch.transpose(self.memory_bank, 1, 0)
-        )
+        inner_prods = torch.matmul(embeddings, torch.transpose(self.memory_bank, 1, 0))
         return inner_prods
 
     def set_memory_bank(self, memory_bank_tensor):
@@ -64,11 +63,11 @@ class MemoryBank():
         assert isinstance(memory_bank_tensor, torch.Tensor)
 
         assert memory_bank_tensor.shape == (self.num_samples, self.dimension)
-        if self.device.type == "xla": # TPU
+        if self.device.type == "xla":  # TPU
             import torch_xla.core.xla_model as xm
 
-            # If the memory bank is loaded, we need to make sure that the "non 
-            # -source" processes have an "all-zeros" memory bank. Otherwise, 
+            # If the memory bank is loaded, we need to make sure that the "non
+            # -source" processes have an "all-zeros" memory bank. Otherwise,
             # all_reduce will result in the wrong update.
             if xm.get_ordinal() != 0:
                 memory_bank_tensor = torch.zeros_like(memory_bank_tensor)
@@ -106,4 +105,3 @@ class MemoryBank():
         self.memory_bank.scatter_(0, indices, entries_to_update)
 
         # TODO: check that all memory banks for all processes are synced
-

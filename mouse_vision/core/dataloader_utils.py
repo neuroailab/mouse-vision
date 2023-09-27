@@ -8,6 +8,7 @@ from torchvision import transforms, datasets
 
 from mouse_vision.core.constants import IMAGENET_MEAN, IMAGENET_STD
 
+
 class ArrayDataset(data.Dataset):
     """
     General dataset constructor using an array of images and labels.
@@ -17,6 +18,7 @@ class ArrayDataset(data.Dataset):
         labels      : numpy array of shape (N,)
         t           : torchvision.transforms instance
     """
+
     def __init__(self, image_array, labels, t=None):
         assert image_array.shape[0] == labels.shape[0]
         assert t is not None
@@ -27,12 +29,13 @@ class ArrayDataset(data.Dataset):
         self.n_images = image_array.shape[0]
 
     def __getitem__(self, index):
-        inputs = self.transforms(self.image_array[index,:,:,:])
+        inputs = self.transforms(self.image_array[index, :, :, :])
         labels = self.labels[index]
         return inputs, labels
 
     def __len__(self):
         return self.n_images
+
 
 def _acquire_data_loader(dataset, batch_size, shuffle, num_workers, pin_memory=True):
     assert isinstance(dataset, data.Dataset)
@@ -41,9 +44,10 @@ def _acquire_data_loader(dataset, batch_size, shuffle, num_workers, pin_memory=T
         batch_size,
         shuffle=shuffle,
         pin_memory=pin_memory,
-        num_workers=num_workers
+        num_workers=num_workers,
     )
     return loader
+
 
 def get_image_array_dataloader(
     image_array,
@@ -52,7 +56,7 @@ def get_image_array_dataloader(
     batch_size=256,
     shuffle=False,
     num_workers=8,
-    pin_memory=True
+    pin_memory=True,
 ):
     """
     Inputs: 
@@ -67,8 +71,11 @@ def get_image_array_dataloader(
     assert image_array.shape[0] == labels.shape[0]
 
     dataset = ArrayDataset(image_array, labels, t=img_transform)
-    dataloader = _acquire_data_loader(dataset, batch_size, shuffle, num_workers, pin_memory=pin_memory)
+    dataloader = _acquire_data_loader(
+        dataset, batch_size, shuffle, num_workers, pin_memory=pin_memory
+    )
     return dataloader
+
 
 def duplicate_channels(gray_images):
     """
@@ -84,5 +91,3 @@ def duplicate_channels(gray_images):
     rgb = np.empty((n, dim0, dim1, 3), dtype=np.uint8)
     rgb[:, :, :, 2] = rgb[:, :, :, 1] = rgb[:, :, :, 0] = gray_images
     return rgb
-
-

@@ -8,33 +8,44 @@ from typing import Optional, Any
 
 __all__ = ["SyncBatchNorm"]
 
+
 class sync_batch_norm(Function):
     # Adapted from: https://github.com/pytorch/pytorch/blob/bf4fcab68104b333c81e39d142dccc7ae7a6f1d7/torch/nn/modules/_functions.py#L6
     @staticmethod
-    def forward(self, input, weight, bias, running_mean, running_var, eps, momentum, process_group, world_size, tpu):
+    def forward(
+        self,
+        input,
+        weight,
+        bias,
+        running_mean,
+        running_var,
+        eps,
+        momentum,
+        process_group,
+        world_size,
+        tpu,
+    ):
         input = input.contiguous()
 
         # calculate mean/invstd for input.
         # this pre-compiled function unfortunately does not work with XLA, only CUDA
         mean, invstd = torch.batch_norm_stats(input, eps)
 
-        count = torch.full((1,), input.numel() // input.size(1),
-                           dtype=mean.dtype,
-                           device=mean.device)
-
+        count = torch.full(
+            (1,), input.numel() // input.size(1), dtype=mean.dtype, device=mean.device
+        )
 
         num_channels = input.shape[1]
         # C, C, 1 -> (2C + 1)
         combined = torch.cat([mean, invstd, count], dim=0)
         if tpu:
             import torch_xla.core.xla_model as xm
+
             # world_size * (2C + 1)
             combined = xm.all_gather(combined, dim=0)
         else:
             # world_size * (2C + 1)
-            combined_list = [
-                torch.empty_like(combined) for k in range(world_size)
-            ]
+            combined_list = [torch.empty_like(combined) for k in range(world_size)]
             dist.all_gather(combined_list, combined, process_group, async_op=False)
             combined = torch.stack(combined_list, dim=0)
         # world_size * (2C + 1) -> world_size * C, world_size * C, world_size * 1
@@ -42,7 +53,11 @@ class sync_batch_norm(Function):
 
         size = count_all.view(-1).long().sum()
         if size == 1:
-            raise ValueError('Expected more than 1 value per channel when training, got input size {}'.format(size))
+            raise ValueError(
+                "Expected more than 1 value per channel when training, got input size {}".format(
+                    size
+                )
+            )
 
         # calculate global mean & invstd
         # not currently supported on XLA: https://github.com/pytorch/xla/issues/2223
@@ -54,7 +69,7 @@ class sync_batch_norm(Function):
             running_var,
             momentum,
             eps,
-            count_all.view(-1)
+            count_all.view(-1),
         )
 
         self.save_for_backward(input, weight, mean, invstd, count_all)
@@ -82,7 +97,7 @@ class sync_batch_norm(Function):
             weight,
             self.needs_input_grad[0],
             self.needs_input_grad[1],
-            self.needs_input_grad[2]
+            self.needs_input_grad[2],
         )
 
         if self.needs_input_grad[0]:
@@ -92,10 +107,15 @@ class sync_batch_norm(Function):
             combined = torch.cat([sum_dy, sum_dy_xmu], dim=0)
             if tpu:
                 import torch_xla.core.xla_model as xm
+
                 combined = xm.all_reduce(reduce_type=xm.REDUCE_SUM, inputs=combined)
             else:
                 torch.distributed.all_reduce(
-                    combined, torch.distributed.ReduceOp.SUM, process_group, async_op=False)
+                    combined,
+                    torch.distributed.ReduceOp.SUM,
+                    process_group,
+                    async_op=False,
+                )
             sum_dy, sum_dy_xmu = torch.split(combined, num_channels)
 
             divisor = count_tensor.sum()
@@ -103,13 +123,7 @@ class sync_batch_norm(Function):
             mean_dy_xmu = sum_dy_xmu / divisor
             # backward pass for gradient calculation
             grad_input = torch.batch_norm_backward_elemt(
-                grad_output,
-                saved_input,
-                mean,
-                invstd,
-                weight,
-                mean_dy,
-                mean_dy_xmu
+                grad_output, saved_input, mean, invstd, weight, mean_dy, mean_dy_xmu
             )
 
         # synchronizing of grad_weight / grad_bias is not needed as distributed
@@ -121,6 +135,7 @@ class sync_batch_norm(Function):
             grad_bias = None
 
         return grad_input, grad_weight, grad_bias, None, None, None, None, None, None
+
 
 class SyncBatchNorm(_BatchNorm):
     # Adapted from: https://github.com/pytorch/pytorch/blob/bf4fcab68104b333c81e39d142dccc7ae7a6f1d7/torch/nn/modules/batchnorm.py#L363
@@ -214,9 +229,11 @@ class SyncBatchNorm(_BatchNorm):
         affine: bool = True,
         track_running_stats: bool = True,
         process_group: Optional[Any] = None,
-        tpu: bool = False
+        tpu: bool = False,
     ) -> None:
-        super(SyncBatchNorm, self).__init__(num_features, eps, momentum, affine, track_running_stats)
+        super(SyncBatchNorm, self).__init__(
+            num_features, eps, momentum, affine, track_running_stats
+        )
         self.process_group = process_group
         self.tpu = tpu
         # gpu_size is set through DistributedDataParallel initialization. This is to ensure that SyncBatchNorm is used
@@ -225,18 +242,21 @@ class SyncBatchNorm(_BatchNorm):
 
     def _check_input_dim(self, input):
         if input.dim() < 2:
-            raise ValueError('expected at least 2D input (got {}D input)'
-                             .format(input.dim()))
+            raise ValueError(
+                "expected at least 2D input (got {}D input)".format(input.dim())
+            )
 
     def _specify_ddp_gpu_num(self, gpu_size):
         if gpu_size > 1:
-            raise ValueError('SyncBatchNorm is only supported for DDP with single GPU per process')
+            raise ValueError(
+                "SyncBatchNorm is only supported for DDP with single GPU per process"
+            )
         self.ddp_gpu_size = gpu_size
 
     def forward(self, input: Tensor) -> Tensor:
         # currently only GPU input is supported
         if (not input.is_cuda) and (not self.tpu):
-            raise ValueError('SyncBatchNorm expected input tensor to be on GPU')
+            raise ValueError("SyncBatchNorm expected input tensor to be on GPU")
 
         self._check_input_dim(input)
 
@@ -273,13 +293,18 @@ class SyncBatchNorm(_BatchNorm):
         # If buffers are not to be tracked, ensure that they won't be updated
         assert self.running_mean is None or isinstance(self.running_mean, torch.Tensor)
         assert self.running_var is None or isinstance(self.running_var, torch.Tensor)
-        running_mean = self.running_mean if not self.training or self.track_running_stats else None
-        running_var = self.running_var if not self.training or self.track_running_stats else None
+        running_mean = (
+            self.running_mean if not self.training or self.track_running_stats else None
+        )
+        running_var = (
+            self.running_var if not self.training or self.track_running_stats else None
+        )
 
         need_sync = bn_training
         if need_sync:
             if self.tpu:
                 import torch_xla.core.xla_model as xm
+
                 world_size = xm.xrt_world_size()
                 process_group = self.process_group
             else:
@@ -292,16 +317,34 @@ class SyncBatchNorm(_BatchNorm):
         # fallback to framework BN when synchronization is not necessary
         if not need_sync:
             return F.batch_norm(
-                input, running_mean, running_var, self.weight, self.bias,
-                bn_training, exponential_average_factor, self.eps)
+                input,
+                running_mean,
+                running_var,
+                self.weight,
+                self.bias,
+                bn_training,
+                exponential_average_factor,
+                self.eps,
+            )
         else:
             if (not self.ddp_gpu_size) and (not self.tpu):
-                raise AttributeError('SyncBatchNorm on GPU is only supported within torch.nn.parallel.DistributedDataParallel')
+                raise AttributeError(
+                    "SyncBatchNorm on GPU is only supported within torch.nn.parallel.DistributedDataParallel"
+                )
 
             assert bn_training
             return sync_batch_norm.apply(
-                input, self.weight, self.bias, running_mean, running_var,
-                self.eps, exponential_average_factor, process_group, world_size, self.tpu)
+                input,
+                self.weight,
+                self.bias,
+                running_mean,
+                running_var,
+                self.eps,
+                exponential_average_factor,
+                process_group,
+                world_size,
+                self.tpu,
+            )
 
     @classmethod
     def convert_sync_batchnorm(cls, module, tpu=False, process_group=None):
@@ -335,12 +378,15 @@ class SyncBatchNorm(_BatchNorm):
         """
         module_output = module
         if isinstance(module, torch.nn.modules.batchnorm._BatchNorm):
-            module_output = SyncBatchNorm(num_features=module.num_features,
-                                                   eps=module.eps, momentum=module.momentum,
-                                                   affine=module.affine,
-                                                   track_running_stats=module.track_running_stats,
-                                                   tpu=tpu,
-                                                   process_group=process_group)
+            module_output = SyncBatchNorm(
+                num_features=module.num_features,
+                eps=module.eps,
+                momentum=module.momentum,
+                affine=module.affine,
+                track_running_stats=module.track_running_stats,
+                tpu=tpu,
+                process_group=process_group,
+            )
             if module.affine:
                 with torch.no_grad():
                     module_output.weight = module.weight
@@ -351,6 +397,8 @@ class SyncBatchNorm(_BatchNorm):
             if hasattr(module, "qconfig"):
                 module_output.qconfig = module.qconfig
         for name, child in module.named_children():
-            module_output.add_module(name, cls.convert_sync_batchnorm(child, process_group))
+            module_output.add_module(
+                name, cls.convert_sync_batchnorm(child, process_group)
+            )
         del module
         return module_output

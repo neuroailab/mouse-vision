@@ -20,26 +20,28 @@ class SimSiamLoss(LossFunctionBase):
         projection_mlp_hidden_dim=2048,
         projection_mlp_output_dim=2048,
         prediction_mlp_hidden_dim=512,
-        prediction_mlp_output_dim=2048
+        prediction_mlp_output_dim=2048,
     ):
         super(SimSiamLoss, self).__init__()
 
         self.projection_mlp = ProjectionMLPSimSiam(
             model_output_dim,
             hidden_dim=projection_mlp_hidden_dim,
-            output_dim=projection_mlp_output_dim
+            output_dim=projection_mlp_output_dim,
         )
 
         self.prediction_mlp = PredictionMLPSimSiam(
             input_dim=projection_mlp_output_dim,
             hidden_dim=prediction_mlp_hidden_dim,
-            output_dim=prediction_mlp_output_dim
+            output_dim=prediction_mlp_output_dim,
         )
 
-        self.neck = nn.ModuleDict({
-            "projection_mlp": self.projection_mlp,
-            "prediction_mlp": self.prediction_mlp,
-        })
+        self.neck = nn.ModuleDict(
+            {
+                "projection_mlp": self.projection_mlp,
+                "prediction_mlp": self.prediction_mlp,
+            }
+        )
 
     def trainable_parameters(self):
         params = list(self.projection_mlp.parameters())
@@ -51,7 +53,7 @@ class SimSiamLoss(LossFunctionBase):
         assert p.shape == z.shape
         assert p.ndim == 2
 
-        z = z.detach() # Stop gradient
+        z = z.detach()  # Stop gradient
         p = l2_normalize(p)
         z = l2_normalize(z)
 
@@ -63,16 +65,15 @@ class SimSiamLoss(LossFunctionBase):
 
     def forward(self, model, x1, x2):
         # x1 is first augmentation and x2 is second augmentation
-        assert x1.ndim == x2.ndim == 4 # NCHW
+        assert x1.ndim == x2.ndim == 4  # NCHW
         assert x1.shape == x2.shape
 
-        f_x1 = self.projection_mlp(model(x1)) # z_1
-        f_x2 = self.projection_mlp(model(x2)) # z_2
+        f_x1 = self.projection_mlp(model(x1))  # z_1
+        f_x2 = self.projection_mlp(model(x2))  # z_2
 
-        h_x1 = self.prediction_mlp(f_x1) # p_1
-        h_x2 = self.prediction_mlp(f_x2) # p_2
+        h_x1 = self.prediction_mlp(f_x1)  # p_1
+        h_x2 = self.prediction_mlp(f_x2)  # p_2
 
         # Page 3, equation 2
         loss = 0.5 * (self.D(h_x1, f_x2) + self.D(h_x2, f_x1))
         return loss
-

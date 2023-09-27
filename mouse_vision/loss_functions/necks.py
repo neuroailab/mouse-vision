@@ -202,9 +202,11 @@ class ProjectionMLPSimSiam(nn.Module):
     See page 3 bottom of https://arxiv.org/pdf/2011.10566.pdf
     """
 
-    assert torch.__version__ > "1.4.0" # For SyncBN
+    assert torch.__version__ > "1.4.0"  # For SyncBN
 
-    def __init__(self, model_output_dim, hidden_dim=2048, output_dim=2048, sync_bn=True):
+    def __init__(
+        self, model_output_dim, hidden_dim=2048, output_dim=2048, sync_bn=True
+    ):
         super(ProjectionMLPSimSiam, self).__init__()
 
         if sync_bn:
@@ -217,20 +219,12 @@ class ProjectionMLPSimSiam(nn.Module):
             bn3 = nn.BatchNorm1d(output_dim)
 
         self.layer1 = nn.Sequential(
-            nn.Linear(model_output_dim, hidden_dim),
-            bn1,
-            nn.ReLU(),
+            nn.Linear(model_output_dim, hidden_dim), bn1, nn.ReLU(),
         )
 
-        self.layer2 = nn.Sequential(
-            nn.Linear(hidden_dim, hidden_dim),
-            bn2,
-            nn.ReLU(),
-        )
+        self.layer2 = nn.Sequential(nn.Linear(hidden_dim, hidden_dim), bn2, nn.ReLU(),)
 
-        self.layer3 = nn.Sequential(
-            nn.Linear(hidden_dim, output_dim), bn3
-        )
+        self.layer3 = nn.Sequential(nn.Linear(hidden_dim, output_dim), bn3)
 
     def forward(self, x):
         x = self.layer1(x)
@@ -245,7 +239,7 @@ class PredictionMLPSimSiam(nn.Module):
     See page 3 bottom of https://arxiv.org/pdf/2011.10566.pdf
     """
 
-    assert torch.__version__ > "1.4.0" # For SyncBN
+    assert torch.__version__ > "1.4.0"  # For SyncBN
 
     def __init__(self, input_dim=2048, hidden_dim=512, output_dim=2048, sync_bn=True):
         super(PredictionMLPSimSiam, self).__init__()
@@ -258,11 +252,7 @@ class PredictionMLPSimSiam(nn.Module):
         # "The dimension of h’s input and output (z and p) is d =
         # 2048, and h’s hidden layer’s dimension is 512, making h
         # a bottleneck structure." (page 3 of paper)
-        self.layer1 = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
-            bn,
-            nn.ReLU(),
-        )
+        self.layer1 = nn.Sequential(nn.Linear(input_dim, hidden_dim), bn, nn.ReLU(),)
 
         self.layer2 = nn.Linear(hidden_dim, output_dim)
 
@@ -271,4 +261,3 @@ class PredictionMLPSimSiam(nn.Module):
         x = self.layer2(x)
 
         return x
-

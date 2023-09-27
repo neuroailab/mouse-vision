@@ -2,45 +2,52 @@ import warnings
 
 import torch
 import torch.nn as nn
-from torchvision.models.utils import load_state_dict_from_url
+from torch.hub import load_state_dict_from_url
 
-__all__ = ['MNASNet', 'mnasnet0_5', 'mnasnet0_75', 'mnasnet1_0', 'mnasnet1_3']
+__all__ = ["MNASNet", "mnasnet0_5", "mnasnet0_75", "mnasnet1_0", "mnasnet1_3"]
 
 _MODEL_URLS = {
-    "mnasnet0_5":
-    "https://download.pytorch.org/models/mnasnet0.5_top1_67.823-3ffadce67e.pth",
+    "mnasnet0_5": "https://download.pytorch.org/models/mnasnet0.5_top1_67.823-3ffadce67e.pth",
     "mnasnet0_75": None,
-    "mnasnet1_0":
-    "https://download.pytorch.org/models/mnasnet1.0_top1_73.512-f206786ef8.pth",
-    "mnasnet1_3": None
+    "mnasnet1_0": "https://download.pytorch.org/models/mnasnet1.0_top1_73.512-f206786ef8.pth",
+    "mnasnet1_3": None,
 }
 
 # Paper suggests 0.9997 momentum, for TensorFlow. Equivalent PyTorch momentum is
 # 1.0 - tensorflow.
 _BN_MOMENTUM = 1 - 0.9997
 
-class _InvertedResidual(nn.Module):
 
-    def __init__(self, in_ch, out_ch, kernel_size, stride, expansion_factor,
-                 bn_momentum=0.1):
+class _InvertedResidual(nn.Module):
+    def __init__(
+        self, in_ch, out_ch, kernel_size, stride, expansion_factor, bn_momentum=0.1
+    ):
         super(_InvertedResidual, self).__init__()
         assert stride in [1, 2]
         assert kernel_size in [3, 5]
         mid_ch = in_ch * expansion_factor
-        self.apply_residual = (in_ch == out_ch and stride == 1)
+        self.apply_residual = in_ch == out_ch and stride == 1
         self.layers = nn.Sequential(
             # Pointwise
             nn.Conv2d(in_ch, mid_ch, 1, bias=False),
             nn.BatchNorm2d(mid_ch, momentum=bn_momentum),
             nn.ReLU(inplace=True),
             # Depthwise
-            nn.Conv2d(mid_ch, mid_ch, kernel_size, padding=kernel_size // 2,
-                      stride=stride, groups=mid_ch, bias=False),
+            nn.Conv2d(
+                mid_ch,
+                mid_ch,
+                kernel_size,
+                padding=kernel_size // 2,
+                stride=stride,
+                groups=mid_ch,
+                bias=False,
+            ),
             nn.BatchNorm2d(mid_ch, momentum=bn_momentum),
             nn.ReLU(inplace=True),
             # Linear pointwise. Note that there's no activation.
             nn.Conv2d(mid_ch, out_ch, 1, bias=False),
-            nn.BatchNorm2d(out_ch, momentum=bn_momentum))
+            nn.BatchNorm2d(out_ch, momentum=bn_momentum),
+        )
 
     def forward(self, input):
         if self.apply_residual:
@@ -49,18 +56,20 @@ class _InvertedResidual(nn.Module):
             return self.layers(input)
 
 
-def _stack(in_ch, out_ch, kernel_size, stride, exp_factor, repeats,
-           bn_momentum):
+def _stack(in_ch, out_ch, kernel_size, stride, exp_factor, repeats, bn_momentum):
     """ Creates a stack of inverted residuals. """
     assert repeats >= 1
     # First one has no skip, because feature map size changes.
-    first = _InvertedResidual(in_ch, out_ch, kernel_size, stride, exp_factor,
-                              bn_momentum=bn_momentum)
+    first = _InvertedResidual(
+        in_ch, out_ch, kernel_size, stride, exp_factor, bn_momentum=bn_momentum
+    )
     remaining = []
     for _ in range(1, repeats):
         remaining.append(
-            _InvertedResidual(out_ch, out_ch, kernel_size, 1, exp_factor,
-                              bn_momentum=bn_momentum))
+            _InvertedResidual(
+                out_ch, out_ch, kernel_size, 1, exp_factor, bn_momentum=bn_momentum
+            )
+        )
     return nn.Sequential(first, *remaining)
 
 
@@ -91,6 +100,7 @@ class MNASNet(torch.nn.Module):
     >>> y.nelement()
     1000
     """
+
     # Version 2 adds depth scaling in the initial stages of the network.
     _version = 2
 
@@ -106,8 +116,15 @@ class MNASNet(torch.nn.Module):
             nn.BatchNorm2d(depths[0], momentum=_BN_MOMENTUM),
             nn.ReLU(inplace=True),
             # Depthwise separable, no skip.
-            nn.Conv2d(depths[0], depths[0], 3, padding=1, stride=1,
-                      groups=depths[0], bias=False),
+            nn.Conv2d(
+                depths[0],
+                depths[0],
+                3,
+                padding=1,
+                stride=1,
+                groups=depths[0],
+                bias=False,
+            ),
             nn.BatchNorm2d(depths[0], momentum=_BN_MOMENTUM),
             nn.ReLU(inplace=True),
             nn.Conv2d(depths[0], depths[1], 1, padding=0, stride=1, bias=False),
@@ -128,8 +145,9 @@ class MNASNet(torch.nn.Module):
         if drop_final_fc:
             self.classifier = nn.Identity()
         else:
-            self.classifier = nn.Sequential(nn.Dropout(p=dropout, inplace=True),
-                                            nn.Linear(1280, num_classes))
+            self.classifier = nn.Sequential(
+                nn.Dropout(p=dropout, inplace=True), nn.Linear(1280, num_classes)
+            )
         self._initialize_weights()
 
     def forward(self, x):
@@ -141,20 +159,28 @@ class MNASNet(torch.nn.Module):
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode="fan_out",
-                                        nonlinearity="relu")
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.ones_(m.weight)
                 nn.init.zeros_(m.bias)
             elif isinstance(m, nn.Linear):
-                nn.init.kaiming_uniform_(m.weight, mode="fan_out",
-                                         nonlinearity="sigmoid")
+                nn.init.kaiming_uniform_(
+                    m.weight, mode="fan_out", nonlinearity="sigmoid"
+                )
                 nn.init.zeros_(m.bias)
 
-    def _load_from_state_dict(self, state_dict, prefix, local_metadata, strict,
-                              missing_keys, unexpected_keys, error_msgs):
+    def _load_from_state_dict(
+        self,
+        state_dict,
+        prefix,
+        local_metadata,
+        strict,
+        missing_keys,
+        unexpected_keys,
+        error_msgs,
+    ):
         version = local_metadata.get("version", None)
 
         # TODO: Nathan hack so that loading pretrained weights for robust model won't break
@@ -171,8 +197,7 @@ class MNASNet(torch.nn.Module):
                 nn.Conv2d(3, 32, 3, padding=1, stride=2, bias=False),
                 nn.BatchNorm2d(32, momentum=_BN_MOMENTUM),
                 nn.ReLU(inplace=True),
-                nn.Conv2d(32, 32, 3, padding=1, stride=1, groups=32,
-                          bias=False),
+                nn.Conv2d(32, 32, 3, padding=1, stride=1, groups=32, bias=False),
                 nn.BatchNorm2d(32, momentum=_BN_MOMENTUM),
                 nn.ReLU(inplace=True),
                 nn.Conv2d(32, 16, 1, padding=0, stride=1, bias=False),
@@ -190,20 +215,27 @@ class MNASNet(torch.nn.Module):
                 "This checkpoint will load and work as before, but "
                 "you may want to upgrade by training a newer model or "
                 "transfer learning from an updated ImageNet checkpoint.",
-                UserWarning)
+                UserWarning,
+            )
 
         super(MNASNet, self)._load_from_state_dict(
-            state_dict, prefix, local_metadata, strict, missing_keys,
-            unexpected_keys, error_msgs)
+            state_dict,
+            prefix,
+            local_metadata,
+            strict,
+            missing_keys,
+            unexpected_keys,
+            error_msgs,
+        )
 
 
 def _load_pretrained(model_name, model, progress):
     if model_name not in _MODEL_URLS or _MODEL_URLS[model_name] is None:
         raise ValueError(
-            "No checkpoint is available for model type {}".format(model_name))
+            "No checkpoint is available for model type {}".format(model_name)
+        )
     checkpoint_url = _MODEL_URLS[model_name]
-    model.load_state_dict(
-        load_state_dict_from_url(checkpoint_url, progress=progress))
+    model.load_state_dict(load_state_dict_from_url(checkpoint_url, progress=progress))
 
 
 def mnasnet0_5(pretrained=False, progress=True, **kwargs):
@@ -260,5 +292,3 @@ def mnasnet1_3(pretrained=False, progress=True, **kwargs):
     if pretrained:
         _load_pretrained("mnasnet1_3", model, progress)
     return model
-
-

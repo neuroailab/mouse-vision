@@ -55,4 +55,3 @@ class RotNetLoss(LossFunctionBase):
         loss = self.loss(predictions, targets)
 
         return loss, predictions
-

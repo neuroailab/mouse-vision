@@ -8,3 +8,5 @@ from .rotnet_loss import *
 from .simsiam_loss import *
 from .autoencoder_loss import *
 from .depth_pred_loss import *
+from .barlow_twins_loss import *
+from .vicreg_loss import *

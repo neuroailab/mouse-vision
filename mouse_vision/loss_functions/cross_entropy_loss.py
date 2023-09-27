@@ -6,6 +6,7 @@ from mouse_vision.loss_functions.loss_function_base import LossFunctionBase
 
 __all__ = ["CrossEntropyLoss"]
 
+
 class CrossEntropyLoss(LossFunctionBase):
     def __init__(self, reduction="mean"):
         super(CrossEntropyLoss, self).__init__()
@@ -17,6 +18,6 @@ class CrossEntropyLoss(LossFunctionBase):
         loss = self.loss(preds, target)
         return loss, preds
 
-if __name__ == "__main__":
-    c = CrossEntropyLoss(mean=[0,0,0], std=[1,1,1])
 
+if __name__ == "__main__":
+    c = CrossEntropyLoss(mean=[0, 0, 0], std=[1, 1, 1])

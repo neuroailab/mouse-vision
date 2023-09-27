@@ -3,30 +3,47 @@ import torch.nn as nn
 
 from collections import OrderedDict
 
-from torchvision.models.utils import load_state_dict_from_url
+from torch.hub import load_state_dict_from_url
 
-__all__ = ["AlexNet", "AlexNetBN", "alexnet", "alexnet_bn",
-           "alexnet_64x64_input_pool_6", "alexnet_64x64_input_pool_1",
-           "alexnet_64x64_input_pool_6_with_ir_transforms",
-           "alexnet_bn_64x64_input_pool_6_with_ir_transforms",
-           "alexnet_relative_location", "alexnet_ir_64x64_input_pool_6",
-           "alexnet_bn_ir_64x64_input_pool_6", "alexnet_ir_224x224",
-           "alexnet_ir_84x84", "alexnet_ir_104x104", "alexnet_ir_124x124",
-           "alexnet_ir_144x144", "alexnet_ir_164x164", "alexnet_ir_184x184",
-           "alexnet_ir_204x204", "alexnet_ir_dmlocomotion", "alexnet_bn_mocov2_64x64", 
-           "alexnet_bn_simclr_64x64", "alexnet_bn_simsiam_64x64", 
-           "alexnet_64x64_rl_scratch_truncated"]
+__all__ = [
+    "AlexNet",
+    "AlexNetBN",
+    "alexnet",
+    "alexnet_bn",
+    "alexnet_64x64_input_pool_6",
+    "alexnet_64x64_input_pool_1",
+    "alexnet_64x64_input_pool_6_with_ir_transforms",
+    "alexnet_bn_64x64_input_pool_6_with_ir_transforms",
+    "alexnet_relative_location",
+    "alexnet_ir_64x64_input_pool_6",
+    "alexnet_bn_ir_64x64_input_pool_6",
+    "alexnet_ir_224x224",
+    "alexnet_ir_84x84",
+    "alexnet_ir_104x104",
+    "alexnet_ir_124x124",
+    "alexnet_ir_144x144",
+    "alexnet_ir_164x164",
+    "alexnet_ir_184x184",
+    "alexnet_ir_204x204",
+    "alexnet_ir_dmlocomotion",
+    "alexnet_bn_mocov2_64x64",
+    "alexnet_bn_simclr_64x64",
+    "alexnet_bn_simsiam_64x64",
+    "alexnet_64x64_rl_scratch_truncated",
+    "alexnet_bn_barlow_twins_64x64",
+    "alexnet_bn_barlow_twins",
+    "alexnet_bn_vicreg_64x64",
+]
 
 model_urls = {
-    'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
+    "alexnet": "https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth",
 }
 
-class AlexNet(nn.Module):
 
-    def __init__(self, num_classes=1000,
-                       pool_size=6,
-                       drop_final_fc=False,
-                       fc6_out=False):
+class AlexNet(nn.Module):
+    def __init__(
+        self, num_classes=1000, pool_size=6, drop_final_fc=False, fc6_out=False
+    ):
         super(AlexNet, self).__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
@@ -52,7 +69,7 @@ class AlexNet(nn.Module):
                 nn.ReLU(inplace=True),
                 nn.Dropout(),
                 nn.Linear(4096, 4096),
-                nn.ReLU(inplace=True)
+                nn.ReLU(inplace=True),
             )
         elif fc6_out:
             self.classifier = nn.Sequential(
@@ -79,11 +96,9 @@ class AlexNet(nn.Module):
         x = self.classifier(x)
         return x
 
-class AlexNetBN(nn.Module):
 
-    def __init__(self, num_classes=1000,
-                       pool_size=6,
-                       drop_final_fc=False):
+class AlexNetBN(nn.Module):
+    def __init__(self, num_classes=1000, pool_size=6, drop_final_fc=False):
         super(AlexNetBN, self).__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
@@ -115,7 +130,7 @@ class AlexNetBN(nn.Module):
                 nn.Dropout(),
                 nn.Linear(4096, 4096),
                 nn.BatchNorm1d(4096),
-                nn.ReLU(inplace=True)
+                nn.ReLU(inplace=True),
             )
         else:
             self.classifier = nn.Sequential(
@@ -147,10 +162,10 @@ def alexnet(pretrained=False, progress=True, **kwargs):
     """
     model = AlexNet(**kwargs)
     if pretrained:
-        state_dict = load_state_dict_from_url(model_urls['alexnet'],
-                                              progress=progress)
+        state_dict = load_state_dict_from_url(model_urls["alexnet"], progress=progress)
         model.load_state_dict(state_dict)
     return model
+
 
 def alexnet_64x64_rl_scratch_truncated(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
@@ -171,7 +186,10 @@ def alexnet_64x64_rl_scratch_truncated(pretrained=False, progress=True, **kwargs
 
     return model
 
-def alexnet_64x64_input_pool_6_with_ir_transforms(pretrained=False, progress=True, **kwargs):
+
+def alexnet_64x64_input_pool_6_with_ir_transforms(
+    pretrained=False, progress=True, **kwargs
+):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
 
@@ -184,6 +202,7 @@ def alexnet_64x64_input_pool_6_with_ir_transforms(pretrained=False, progress=Tru
     """
     model = AlexNet(pool_size=6, **kwargs)
     return model
+
 
 def alexnet_64x64_input_pool_6(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
@@ -198,6 +217,7 @@ def alexnet_64x64_input_pool_6(pretrained=False, progress=True, **kwargs):
     model = AlexNet(pool_size=6, **kwargs)
     return model
 
+
 def alexnet_64x64_input_pool_1(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -210,6 +230,7 @@ def alexnet_64x64_input_pool_1(pretrained=False, progress=True, **kwargs):
     """
     model = AlexNet(pool_size=1, **kwargs)
     return model
+
 
 def alexnet_relative_location(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
@@ -225,6 +246,7 @@ def alexnet_relative_location(pretrained=False, progress=True, **kwargs):
     model = AlexNet(pool_size=6, fc6_out=True, **kwargs)
     return model
 
+
 def alexnet_ir_64x64_input_pool_6(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -238,6 +260,7 @@ def alexnet_ir_64x64_input_pool_6(pretrained=False, progress=True, **kwargs):
     model = AlexNet(pool_size=6, drop_final_fc=True, **kwargs)
     return model
 
+
 def alexnet_bn(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -250,6 +273,7 @@ def alexnet_bn(pretrained=False, progress=True, **kwargs):
     """
     model = AlexNetBN(**kwargs)
     return model
+
 
 def alexnet_bn_simsiam_64x64(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
@@ -265,6 +289,7 @@ def alexnet_bn_simsiam_64x64(pretrained=False, progress=True, **kwargs):
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
 
+
 def alexnet_bn_simclr_64x64(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -278,6 +303,7 @@ def alexnet_bn_simclr_64x64(pretrained=False, progress=True, **kwargs):
     """
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
+
 
 def alexnet_bn_mocov2_64x64(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
@@ -293,7 +319,10 @@ def alexnet_bn_mocov2_64x64(pretrained=False, progress=True, **kwargs):
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
 
-def alexnet_bn_64x64_input_pool_6_with_ir_transforms(pretrained=False, progress=True, **kwargs):
+
+def alexnet_bn_64x64_input_pool_6_with_ir_transforms(
+    pretrained=False, progress=True, **kwargs
+):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
 
@@ -306,6 +335,7 @@ def alexnet_bn_64x64_input_pool_6_with_ir_transforms(pretrained=False, progress=
     """
     model = AlexNetBN(pool_size=6, **kwargs)
     return model
+
 
 def alexnet_bn_ir_64x64_input_pool_6(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
@@ -321,6 +351,7 @@ def alexnet_bn_ir_64x64_input_pool_6(pretrained=False, progress=True, **kwargs):
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
 
+
 def alexnet_ir_84x84(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -334,6 +365,7 @@ def alexnet_ir_84x84(pretrained=False, progress=True, **kwargs):
     """
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
+
 
 def alexnet_ir_104x104(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
@@ -349,6 +381,7 @@ def alexnet_ir_104x104(pretrained=False, progress=True, **kwargs):
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
 
+
 def alexnet_ir_124x124(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -362,6 +395,7 @@ def alexnet_ir_124x124(pretrained=False, progress=True, **kwargs):
     """
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
+
 
 def alexnet_ir_144x144(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
@@ -377,6 +411,7 @@ def alexnet_ir_144x144(pretrained=False, progress=True, **kwargs):
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
 
+
 def alexnet_ir_164x164(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -390,6 +425,7 @@ def alexnet_ir_164x164(pretrained=False, progress=True, **kwargs):
     """
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
+
 
 def alexnet_ir_184x184(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
@@ -405,6 +441,7 @@ def alexnet_ir_184x184(pretrained=False, progress=True, **kwargs):
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
 
+
 def alexnet_ir_204x204(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -418,6 +455,7 @@ def alexnet_ir_204x204(pretrained=False, progress=True, **kwargs):
     """
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
+
 
 def alexnet_ir_224x224(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
@@ -433,11 +471,57 @@ def alexnet_ir_224x224(pretrained=False, progress=True, **kwargs):
     model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
     return model
 
+
 def alexnet_ir_dmlocomotion(pretrained=False, progress=True, **kwargs):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
 
     Trained using the instance discrimination loss with 64x64 dmlocomotion inputs.
+    Avg pooling size of 6.
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
+    return model
+
+
+def alexnet_bn_barlow_twins_64x64(pretrained=False, progress=True, **kwargs):
+    r"""AlexNet model architecture from the
+    `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
+    Same as above but with BN.
+    trained using the BarlowTwins loss with 64x64 imagenet inputs.
+    Avg pooling size of 6.
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
+    return model
+
+
+def alexnet_bn_barlow_twins(pretrained=False, progress=True, **kwargs):
+    r"""AlexNet model architecture from the
+    `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
+    Same as above but with BN.
+    trained using the Barlow Twins loss.
+    Avg pooling size of 6.
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    model = AlexNetBN(pool_size=6, drop_final_fc=True, **kwargs)
+    return model
+
+
+def alexnet_bn_vicreg_64x64(pretrained=False, progress=True, **kwargs):
+    r"""AlexNet model architecture from the
+    `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
+    Same as above but with BN.
+    trained using the VICReg loss with 64x64 imagenet inputs.
     Avg pooling size of 6.
 
     Args:

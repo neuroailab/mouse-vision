@@ -7,6 +7,7 @@ from mouse_vision.loss_functions.loss_function_base import LossFunctionBase
 
 __all__ = ["MoCov2Loss"]
 
+
 class MoCov2Loss(LossFunctionBase):
     """MoCov2.
     Implementation of "Momentum Contrast for Unsupervised Visual
@@ -26,31 +27,35 @@ class MoCov2Loss(LossFunctionBase):
             Default: 0.999.
     """
 
-    def __init__(self,
-                 encoder_q_backbone,
-                 encoder_k_backbone,
-                 model_output_dim,
-                 hidden_dim=2048,
-                 pretrained=None,
-                 queue_len=65536,
-                 feat_dim=128,
-                 momentum=0.999,
-                 temperature=0.2,
-                 tpu=False,
-                 **kwargs):
+    def __init__(
+        self,
+        encoder_q_backbone,
+        encoder_k_backbone,
+        model_output_dim,
+        hidden_dim=2048,
+        pretrained=None,
+        queue_len=65536,
+        feat_dim=128,
+        momentum=0.999,
+        temperature=0.2,
+        tpu=False,
+        **kwargs
+    ):
         super(MoCov2Loss, self).__init__()
 
         self._hidden_dim = hidden_dim
-        self.encoder_q_neck = NonLinearNeckMoCov2(in_channels=model_output_dim,
-                                                  hid_channels=self._hidden_dim,
-                                                  out_channels=feat_dim)
-        self.encoder_k_neck = NonLinearNeckMoCov2(in_channels=model_output_dim,
-                                                  hid_channels=self._hidden_dim,
-                                                  out_channels=feat_dim)
-        self.encoder_q = nn.Sequential(
-            encoder_q_backbone, self.encoder_q_neck)
-        self.encoder_k = nn.Sequential(
-            encoder_k_backbone, self.encoder_k_neck)
+        self.encoder_q_neck = NonLinearNeckMoCov2(
+            in_channels=model_output_dim,
+            hid_channels=self._hidden_dim,
+            out_channels=feat_dim,
+        )
+        self.encoder_k_neck = NonLinearNeckMoCov2(
+            in_channels=model_output_dim,
+            hid_channels=self._hidden_dim,
+            out_channels=feat_dim,
+        )
+        self.encoder_q = nn.Sequential(encoder_q_backbone, self.encoder_q_neck)
+        self.encoder_k = nn.Sequential(encoder_k_backbone, self.encoder_k_neck)
 
         for param in self.encoder_k.parameters():
             param.requires_grad = False
@@ -73,19 +78,22 @@ class MoCov2Loss(LossFunctionBase):
                 Default: None.
         """
         if pretrained is not None:
-            print('load model from: {}'.format(pretrained))
-        self.encoder_q[1].init_weights(init_linear='kaiming')
-        for param_q, param_k in zip(self.encoder_q.parameters(),
-                                    self.encoder_k.parameters()):
+            print("load model from: {}".format(pretrained))
+        self.encoder_q[1].init_weights(init_linear="kaiming")
+        for param_q, param_k in zip(
+            self.encoder_q.parameters(), self.encoder_k.parameters()
+        ):
             param_k.data.copy_(param_q.data)
 
     @torch.no_grad()
     def _momentum_update_key_encoder(self):
         """Momentum update of the key encoder."""
-        for param_q, param_k in zip(self.encoder_q.parameters(),
-                                    self.encoder_k.parameters()):
-            param_k.data = param_k.data * self.momentum + \
-                           param_q.data * (1. - self.momentum)
+        for param_q, param_k in zip(
+            self.encoder_q.parameters(), self.encoder_k.parameters()
+        ):
+            param_k.data = param_k.data * self.momentum + param_q.data * (
+                1.0 - self.momentum
+            )
 
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys):
@@ -96,12 +104,12 @@ class MoCov2Loss(LossFunctionBase):
         batch_size = keys.shape[0]
 
         ptr = int(self.queue_ptr)
-        #if self.queue_len % batch_size != 0:
+        # if self.queue_len % batch_size != 0:
         #    print('QUEUE LEN', self.queue_len, 'BATCH SIZE', batch_size)
         assert self.queue_len % batch_size == 0  # for simplicity
 
         # replace the keys at ptr (dequeue and enqueue)
-        self.queue[:, ptr:ptr + batch_size] = keys.transpose(0, 1)
+        self.queue[:, ptr : ptr + batch_size] = keys.transpose(0, 1)
         ptr = (ptr + batch_size) % self.queue_len  # move pointer
 
         self.queue_ptr[0] = ptr
@@ -119,9 +127,10 @@ class MoCov2Loss(LossFunctionBase):
         num_devices = batch_size_all // batch_size_this
         if self.tpu:
             import torch_xla.core.xla_model as xm
-            assert(num_devices == xm.xrt_world_size())
+
+            assert num_devices == xm.xrt_world_size()
         else:
-            assert(num_devices == torch.distributed.get_world_size())
+            assert num_devices == torch.distributed.get_world_size()
 
         # random shuffle index
         idx_shuffle = torch.randperm(batch_size_all).to(x.device)
@@ -129,6 +138,7 @@ class MoCov2Loss(LossFunctionBase):
         # broadcast to all gpus
         if self.tpu:
             import torch_xla.core.xla_model as xm
+
             if xm.get_ordinal() != 0:
                 idx_shuffle = torch.zeros_like(idx_shuffle)
 
@@ -143,6 +153,7 @@ class MoCov2Loss(LossFunctionBase):
         # shuffled index for this gpu
         if self.tpu:
             import torch_xla.core.xla_model as xm
+
             rank_idx = xm.get_ordinal()
         else:
             rank_idx = torch.distributed.get_rank()
@@ -163,9 +174,10 @@ class MoCov2Loss(LossFunctionBase):
         num_devices = batch_size_all // batch_size_this
         if self.tpu:
             import torch_xla.core.xla_model as xm
-            assert(num_devices == xm.xrt_world_size())
+
+            assert num_devices == xm.xrt_world_size()
         else:
-            assert(num_devices == torch.distributed.get_world_size())
+            assert num_devices == torch.distributed.get_world_size()
         # restored index for this gpu
         if self.tpu:
             rank_idx = xm.get_ordinal()
@@ -183,8 +195,7 @@ class MoCov2Loss(LossFunctionBase):
         Returns:
             dict[str, Tensor]: A dictionary of loss components.
         """
-        assert img.dim() == 5, \
-            "Input must have 5 dims, got: {}".format(img.dim())
+        assert img.dim() == 5, "Input must have 5 dims, got: {}".format(img.dim())
         im_q = img[:, 0, ...].contiguous()
         im_k = img[:, 1, ...].contiguous()
         # compute query features
@@ -210,9 +221,9 @@ class MoCov2Loss(LossFunctionBase):
         # compute logits
         # Einstein sum is more intuitive
         # positive logits: Nx1
-        l_pos = torch.einsum('nc,nc->n', [q, k]).unsqueeze(-1)
+        l_pos = torch.einsum("nc,nc->n", [q, k]).unsqueeze(-1)
         # negative logits: NxK
-        l_neg = torch.einsum('nc,ck->nk', [q, self.queue.clone().detach()])
+        l_neg = torch.einsum("nc,ck->nk", [q, self.queue.clone().detach()])
 
         losses = self.head(l_pos, l_neg)
         if mode == "train":
@@ -224,6 +235,7 @@ class MoCov2Loss(LossFunctionBase):
 
         return losses
 
+
 # utils
 @torch.no_grad()
 def concat_all_gather(tensor, tpu=False):
@@ -232,11 +244,11 @@ def concat_all_gather(tensor, tpu=False):
     """
     if tpu:
         import torch_xla.core.xla_model as xm
+
         output = xm.all_gather(tensor, dim=0)
     else:
         tensors_gather = [
-            torch.ones_like(tensor)
-            for _ in range(torch.distributed.get_world_size())
+            torch.ones_like(tensor) for _ in range(torch.distributed.get_world_size())
         ]
         torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
 

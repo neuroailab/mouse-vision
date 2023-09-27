@@ -2,21 +2,46 @@ import torch.nn as nn
 
 __all__ = ["AlexNetDict", "alexnet_64x64_input_dict"]
 
+
 class AlexNetDict(nn.Module):
     """
     Implementation of AlexNet using ModuleDict
     """
-    def __init__(self, num_classes=1000,
-                       pool_size=6,
-                       drop_final_fc=False):
+
+    def __init__(self, num_classes=1000, pool_size=6, drop_final_fc=False):
         super(AlexNetDict, self).__init__()
 
         self.alexnet_params = {
-            "input_pool1": {"kernel_size":11, "num_channels":64, "stride":4, "padding":2},
-            "pool1_pool2": {"kernel_size":5, "num_channels":192, "stride":1, "padding":2},
-            "pool2_conv3": {"kernel_size":3, "num_channels":384, "stride":1, "padding":1},
-            "conv3_conv4": {"kernel_size":3, "num_channels":256, "stride":1, "padding":1},
-            "conv4_pool5": {"kernel_size":3, "num_channels":256, "stride":1, "padding":1},
+            "input_pool1": {
+                "kernel_size": 11,
+                "num_channels": 64,
+                "stride": 4,
+                "padding": 2,
+            },
+            "pool1_pool2": {
+                "kernel_size": 5,
+                "num_channels": 192,
+                "stride": 1,
+                "padding": 2,
+            },
+            "pool2_conv3": {
+                "kernel_size": 3,
+                "num_channels": 384,
+                "stride": 1,
+                "padding": 1,
+            },
+            "conv3_conv4": {
+                "kernel_size": 3,
+                "num_channels": 256,
+                "stride": 1,
+                "padding": 1,
+            },
+            "conv4_pool5": {
+                "kernel_size": 3,
+                "num_channels": 256,
+                "stride": 1,
+                "padding": 1,
+            },
         }
         if drop_final_fc:
             self.alexnet_layers = [
@@ -26,7 +51,7 @@ class AlexNetDict(nn.Module):
                 "conv3_conv4",
                 "conv4_pool5",
                 "pool5_fc1",
-                "fc1_fc2"
+                "fc1_fc2",
             ]
             self.output_layer = "fc2"
         else:
@@ -38,7 +63,7 @@ class AlexNetDict(nn.Module):
                 "conv4_pool5",
                 "pool5_fc1",
                 "fc1_fc2",
-                "fc2_fc3"
+                "fc2_fc3",
             ]
             self.output_layer = "fc3"
 
@@ -59,29 +84,29 @@ class AlexNetDict(nn.Module):
                 stride = self.alexnet_params[layer]["stride"]
                 padding = self.alexnet_params[layer]["padding"]
 
-            if "pool" in layer.split('_')[-1]:
+            if "pool" in layer.split("_")[-1]:
                 self.model_layers[layer] = nn.Sequential(
                     nn.Conv2d(
                         in_channels,
                         out_channels,
                         kernel_size=kernel_size,
                         stride=stride,
-                        padding=padding
+                        padding=padding,
                     ),
                     nn.ReLU(inplace=True),
                     # All pooling in alexnet has kernel_size=3 and stride=2
-                    nn.MaxPool2d(kernel_size=3, stride=2)
+                    nn.MaxPool2d(kernel_size=3, stride=2),
                 )
-            elif "conv" in layer.split('_')[-1]:
+            elif "conv" in layer.split("_")[-1]:
                 self.model_layers[layer] = nn.Sequential(
                     nn.Conv2d(
                         in_channels,
                         out_channels,
                         kernel_size=kernel_size,
                         stride=stride,
-                        padding=padding
+                        padding=padding,
                     ),
-                    nn.ReLU(inplace=True)
+                    nn.ReLU(inplace=True),
                 )
             elif layer == "pool5_fc1":
                 self.model_layers[layer] = nn.Sequential(
@@ -89,18 +114,14 @@ class AlexNetDict(nn.Module):
                     nn.Flatten(start_dim=1),
                     nn.Dropout(),
                     nn.Linear(256 * pool_size * pool_size, 4096),
-                    nn.ReLU(inplace=True)
+                    nn.ReLU(inplace=True),
                 )
             elif layer == "fc1_fc2":
                 self.model_layers[layer] = nn.Sequential(
-                    nn.Dropout(),
-                    nn.Linear(4096, 4096),
-                    nn.ReLU(inplace=True)
+                    nn.Dropout(), nn.Linear(4096, 4096), nn.ReLU(inplace=True)
                 )
             elif layer == "fc2_fc3":
-                self.model_layers[layer] = nn.Sequential(
-                    nn.Linear(4096, num_classes)
-                )
+                self.model_layers[layer] = nn.Sequential(nn.Linear(4096, num_classes))
             else:
                 raise ValueError(f"{layer} undefined.")
 
@@ -112,7 +133,7 @@ class AlexNetDict(nn.Module):
         self.layer_names = list()
         self.layers = dict()
         for layer in self.alexnet_layers:
-            source_target_pair = layer.split('_')
+            source_target_pair = layer.split("_")
             assert len(source_target_pair) == 2
             source = source_target_pair[0]
             target = source_target_pair[1]
@@ -159,7 +180,7 @@ if __name__ == "__main__":
 
     # Define inputs
     torch.manual_seed(0)
-    x = torch.rand(8,3,224,224)
+    x = torch.rand(8, 3, 224, 224)
 
     # Define original alexnet
     torch.manual_seed(0)
@@ -188,23 +209,23 @@ if __name__ == "__main__":
             return x
 
     dataloader = get_image_array_dataloader(x, torch.ones(x.shape[0]), Identity())
-    fe = FeatureExtractor(dataloader=dataloader, n_batches=None, vectorize=False, debug=True)
+    fe = FeatureExtractor(
+        dataloader=dataloader, n_batches=None, vectorize=False, debug=True
+    )
     for i, layer_name in enumerate(MODEL_LAYERS["alexnet"]):
         features = get_layer_features(
             feature_extractor=fe,
             layer_name=layer_name,
             model=orig_alexnet,
-            model_name="alexnet"
+            model_name="alexnet",
         )
         my_layer_output = my_alexnet.layers[my_alexnet.layer_names[i]]
 
-        print(f"Layer {my_alexnet.layer_names[i]}, {layer_name}, features "
-              f"identical: {np.allclose(features, my_layer_output.numpy(), rtol=1e-2, atol=1e-3)}")
+        print(
+            f"Layer {my_alexnet.layer_names[i]}, {layer_name}, features "
+            f"identical: {np.allclose(features, my_layer_output.numpy(), rtol=1e-2, atol=1e-3)}"
+        )
         print(features.shape, my_layer_output.cpu().numpy().shape)
         print(f"Max difference: {np.max(my_layer_output.numpy() - features)}")
         print(f"Min difference: {np.min(my_layer_output.numpy() - features)}")
         print(f"Average difference: {np.mean(my_layer_output.numpy() - features)}")
-
-
-
-
