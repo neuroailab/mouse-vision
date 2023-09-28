@@ -29,7 +29,21 @@ To get the saved checkpoints of the models, simply run this script:
 This will save them to the current directory in the folder `./model_ckpts/`.
 If you want a subset of the models, feel free to modify the for loop in the above bash script.
 
+Models are named according to the convention of `[architecture]_[lossfunction]`, all of which are trained on the ImageNet dataset and described in [our paper](https://www.biorxiv.org/content/10.1101/2021.06.16.448730).
+Some models may be better suited than others based on your needs, but we recommend: 
+- `alexnet_bn_ir`, which is overall our best predictive model of mouse visual cortical responses (specifically, the first four layers: `features.3`, `features.7`, `features.10`, and `features.13`, as can be seen in Figure 2B).
+*We highly recommend this model for general purpose use.*
+It is an AlexNet architecture trained with the Instance Recognition objective on `64x64`-pixel ImageNet inputs.
+- `dual_stream_ir`, which is our second best predictive model and models the skip connections of mouse visual cortex, consisting of two streams.
+It is trained with the Instance Recognition objective on `64x64`-pixel ImageNet inputs.
+- `six_stream_simclr`, which is our best predictive six stream architecture, and is trained with the SimCLR objective on `64x64`-pixel ImageNet inputs.
+- `shi_mousenet_ir`, which is the Shi *et al.* 2020 MouseNet architecture that attempts to map the details of the mouse connectome onto a CNN architecture, and is trained with an Instance Recognition objective on `64x64`-pixel ImageNet inputs.
+- `shi_mousenet_vispor5_ir`, which is the same as `shi_mousenet_ir`, but where final layer reads off of the penultimate layer (`VISpor5`) of the model, rather than the concatenation of the earlier layers as originally proposed.
+
 ## Training Code
+Download ImageNet and then run under `mouse_vision/model_training/`,
+`python run_trainer.py --config=[]`.
+The loss functions available are:
 
 ## Neural Responses
 To download the preprocessed Allen Institute Neuropixels and Calcium Imaging datasets, simply run this script:
@@ -44,3 +58,17 @@ You can load the corresponding neural dataset with the command:
 from mouse_vision.core.utils import open_dataset
 d = open_dataset(/path/to/file.pkl)
 ```
+
+## Cite
+If you used this codebase for your research, please consider citing our paper:
+```
+@article{NayebiKong2023mouse,
+  title={Mouse visual cortex as a limited resource system that self-learns an ecologically-general representation},
+  author={Nayebi, Aran* and Kong, NC* and Zhuang, Chengxu and Gardner, Justin L and Norcia, Anthony M and Yamins, DL},
+  journal={PLOS Computational Biology},
+  year={2023}
+}
+```
+
+## Contact
+If you have any questions or encounter issues, either submit a Github issue here or email `anayebi@mit.edu` and `nclkong@mit.edu`.
