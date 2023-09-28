@@ -18,8 +18,10 @@ setup(
         "regex==2020.11.13",
         "scikit_learn==0.24.2",
         "scipy==1.5.2",
+        "seaborn==0.10.1",
         "Shapely==1.7.1",
-        "torch==1.6",
+        "torch==1.6.0",
+        "torch_xla==1.0",
         "torchvision==0.7.0",
         "xarray==0.15.1"
     ],
