@@ -3,10 +3,22 @@ Contains information on image transformations used by different trainers
 (e.g. supervised, self-supervised, etc) during training and validation.
 """
 import numpy as np
+import random
 from torchvision import transforms
 from mouse_vision.core.constants import CIFAR10_MEAN, CIFAR10_STD
 from mouse_vision.core.constants import IMAGENET_MEAN, IMAGENET_STD
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageOps
+
+
+class TwinsTransform:
+    def __init__(self, tr1, tr2):
+        self.transform = transforms.Compose(tr1)
+        self.transform_prime = transforms.Compose(tr2)
+
+    def __call__(self, x):
+        y1 = self.transform(x)
+        y2 = self.transform_prime(x)
+        return y1, y2
 
 
 class GaussianBlur(object):
@@ -45,6 +57,37 @@ class RandomAppliedTrans(object):
     def __repr__(self):
         repr_str = self.__class__.__name__
         return repr_str
+
+
+class GaussianBlurBarlowTwins(object):
+    """
+    Taken from: https://github.com/facebookresearch/barlowtwins/blob/a655214c76c97d0150277b85d16e69328ea52fd9/main.py#L267-L276
+    """
+
+    def __init__(self, p):
+        self.p = p
+
+    def __call__(self, img):
+        if random.random() < self.p:
+            sigma = random.random() * 1.9 + 0.1
+            return img.filter(ImageFilter.GaussianBlur(sigma))
+        else:
+            return img
+
+
+class Solarization(object):
+    """
+    Taken from: https://github.com/facebookresearch/barlowtwins/blob/a655214c76c97d0150277b85d16e69328ea52fd9/main.py#L279-L287
+    """
+
+    def __init__(self, p):
+        self.p = p
+
+    def __call__(self, img):
+        if random.random() < self.p:
+            return ImageOps.solarize(img)
+        else:
+            return img
 
 
 TRAINER_TRANSFORMS = dict()
@@ -349,7 +392,9 @@ TRAINER_TRANSFORMS["InstanceDiscriminationTrainer_204x204"]["val"] = [
 
 TRAINER_TRANSFORMS["DMLocomotionInstanceDiscriminationTrainer"] = dict()
 TRAINER_TRANSFORMS["DMLocomotionInstanceDiscriminationTrainer"]["train"] = [
-    transforms.RandomResizedCrop(64, scale=(0.4, 1.0)), # increasing the scale since input images already small (64x64)
+    transforms.RandomResizedCrop(
+        64, scale=(0.4, 1.0)
+    ),  # increasing the scale since input images already small (64x64)
     transforms.RandomGrayscale(p=0.2),
     transforms.ColorJitter(0.4, 0.4, 0.4, 0.4),
     transforms.RandomHorizontalFlip(),
@@ -357,9 +402,9 @@ TRAINER_TRANSFORMS["DMLocomotionInstanceDiscriminationTrainer"]["train"] = [
     transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
 ]
 TRAINER_TRANSFORMS["DMLocomotionInstanceDiscriminationTrainer"]["val"] = [
-    transforms.Resize(256), # we keep this since we val on neural data
-    transforms.CenterCrop(224), # we keep this since we val on neural data
-    transforms.Resize(64), # we keep this since we val on neural data
+    transforms.Resize(256),  # we keep this since we val on neural data
+    transforms.CenterCrop(224),  # we keep this since we val on neural data
+    transforms.Resize(64),  # we keep this since we val on neural data
     transforms.ToTensor(),
     transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
 ]
@@ -593,3 +638,75 @@ TRAINER_TRANSFORMS["DepthPredictionTrainer_64x64"]["val"] = [
     transforms.ToTensor(),
     transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
 ]
+
+# BarlowTwins Transforms
+# from: https://github.com/facebookresearch/barlowtwins/blob/a655214c76c97d0150277b85d16e69328ea52fd9/main.py#L292-L321
+BT_postfix = [
+    transforms.ToTensor(),
+    transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+]
+
+BT_TR1_prefix = [
+    transforms.RandomResizedCrop(224, interpolation=Image.BICUBIC),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomApply(
+        [transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.2, hue=0.1)],
+        p=0.8,
+    ),
+    transforms.RandomGrayscale(p=0.2),
+    GaussianBlurBarlowTwins(p=1.0),
+    Solarization(p=0.0),
+]
+
+BT_TR2_prefix = [
+    transforms.RandomResizedCrop(224, interpolation=Image.BICUBIC),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomApply(
+        [transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.2, hue=0.1)],
+        p=0.8,
+    ),
+    transforms.RandomGrayscale(p=0.2),
+    GaussianBlurBarlowTwins(p=0.1),
+    Solarization(p=0.2),
+]
+
+BT_TR1 = BT_TR1_prefix + BT_postfix
+BT_TR1_64x64 = BT_TR1_prefix + [transforms.Resize(64)] + BT_postfix
+
+BT_TR2 = BT_TR2_prefix + BT_postfix
+BT_TR2_64x64 = BT_TR2_prefix + [transforms.Resize(64)] + BT_postfix
+
+# transforms during linear training & evaluation, from: https://github.com/facebookresearch/barlowtwins/blob/main/evaluate.py#L125-L137
+BT_TR_prefix = [transforms.RandomResizedCrop(224), transforms.RandomHorizontalFlip()]
+BT_VAL_prefix = [transforms.Resize(256), transforms.CenterCrop(224)]
+
+BT_TR = BT_TR_prefix + BT_postfix
+BT_TR_64x64 = BT_TR_prefix + [transforms.Resize(64)] + BT_postfix
+
+BT_VAL = BT_VAL_prefix + BT_postfix
+BT_VAL_64x64 = BT_VAL_prefix + [transforms.Resize(64)] + BT_postfix
+
+TRAINER_TRANSFORMS["BarlowTwinsTrainer"] = dict()
+TRAINER_TRANSFORMS["BarlowTwinsTrainer"]["tr1"] = BT_TR1
+TRAINER_TRANSFORMS["BarlowTwinsTrainer"]["tr2"] = BT_TR2
+TRAINER_TRANSFORMS["BarlowTwinsTrainer"]["train"] = BT_TR
+TRAINER_TRANSFORMS["BarlowTwinsTrainer"]["val"] = BT_VAL
+
+TRAINER_TRANSFORMS["BarlowTwinsTrainer_64x64"] = dict()
+TRAINER_TRANSFORMS["BarlowTwinsTrainer_64x64"]["tr1"] = BT_TR1_64x64
+TRAINER_TRANSFORMS["BarlowTwinsTrainer_64x64"]["tr2"] = BT_TR2_64x64
+TRAINER_TRANSFORMS["BarlowTwinsTrainer_64x64"]["train"] = BT_TR_64x64
+TRAINER_TRANSFORMS["BarlowTwinsTrainer_64x64"]["val"] = BT_VAL_64x64
+
+# from: https://github.com/facebookresearch/vicreg/blob/cc1ef4f1584a26770308a9b8f1538e490a6d4b43/augmentations.py
+TRAINER_TRANSFORMS["VICRegTrainer"] = dict()
+TRAINER_TRANSFORMS["VICRegTrainer"]["tr1"] = BT_TR1
+TRAINER_TRANSFORMS["VICRegTrainer"]["tr2"] = BT_TR2
+TRAINER_TRANSFORMS["VICRegTrainer"]["train"] = BT_TR
+TRAINER_TRANSFORMS["VICRegTrainer"]["val"] = BT_VAL
+
+TRAINER_TRANSFORMS["VICRegTrainer_64x64"] = dict()
+TRAINER_TRANSFORMS["VICRegTrainer_64x64"]["tr1"] = BT_TR1_64x64
+TRAINER_TRANSFORMS["VICRegTrainer_64x64"]["tr2"] = BT_TR2_64x64
+TRAINER_TRANSFORMS["VICRegTrainer_64x64"]["train"] = BT_TR_64x64
+TRAINER_TRANSFORMS["VICRegTrainer_64x64"]["val"] = BT_VAL_64x64
