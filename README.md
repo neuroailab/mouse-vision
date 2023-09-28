@@ -38,7 +38,7 @@ It is an AlexNet architecture trained with the Instance Recognition objective on
 It is trained with the Instance Recognition objective on `64x64`-pixel ImageNet inputs.
 - `six_stream_simclr`, which is our best predictive six stream architecture, and is trained with the SimCLR objective on `64x64`-pixel ImageNet inputs.
 - `shi_mousenet_ir`, which is the Shi *et al.* 2020 MouseNet architecture that attempts to map the details of the mouse connectome onto a CNN architecture, and is trained with an Instance Recognition objective on `64x64`-pixel ImageNet inputs.
-- `shi_mousenet_vispor5_ir`, which is the same as `shi_mousenet_ir`, but where final layer reads off of the penultimate layer (`VISpor5`) of the model, rather than the concatenation of the earlier layers as originally proposed.
+- `shi_mousenet_vispor5_ir`, which is the same as `shi_mousenet_ir`, but where the final loss layer reads off of the penultimate layer (`VISpor5`) of the model, rather than the concatenation of the earlier layers as originally proposed.
 
 ## Training Code
 Download ImageNet and then run under `mouse_vision/model_training/`,
