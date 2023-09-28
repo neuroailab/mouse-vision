@@ -53,6 +53,7 @@ For example, to train our best model overall (`alexnet_bn_ir`), you can run this
 ```
 CUDA_VISIBLE_DEVICES=0 python run_trainer.py --config=configs/ir/alexnet_bn_ir.json
 ```
+Note that you will have to modify the `save_prefix` key in the json file to the directory that you want to save your checkpoints.
 
 
 ## Neural Responses
