@@ -22,7 +22,7 @@ To install this package and all of its dependecies, clone this repo on your mach
 4. Run `pip install -e .` to install the current version.
 
 ## Available Pre-trained Models
-To get the saved checkpoints of the models, simply run this script:
+To get the saved checkpoints of the models, simply run this bash script:
 ```
 ./get_checkpoints.sh
 ```
@@ -45,10 +45,11 @@ It is trained with the Instance Recognition objective on `64x64`-pixel ImageNet 
 ## Training Code
 Download ImageNet and then run under `mouse_vision/model_training/`,
 `python run_trainer.py --config=[]`.
-The loss functions available are:
+The loss functions available are implemented in the `mouse_vision/loss_functions/` [directory](https://github.com/neuroailab/mouse-vision/tree/main/mouse_vision/loss_functions), and include self-supervised loss functions such as: Instance Recognition, SimCLR, SimSiam, VICReg, BarlowTwins, MoCov2, RotNet, RelativeLocation, and AutoEncoding; along with supervised loss functions such as: Depth Prediction and CrossEntropy (for categorization).
+
 
 ## Neural Responses
-To download the preprocessed Allen Institute Neuropixels and Calcium Imaging datasets, simply run this script:
+To download the preprocessed Allen Institute Neuropixels and Calcium Imaging datasets, simply run this bash script:
 ```
 ./get_neural_data.sh
 ```
