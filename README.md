@@ -1,5 +1,5 @@
 # Models of Mouse Vision
-This repo contains self-supervised, ImageNet pre-trained convolutional network models of mouse visual cortex; the preprocessed neural responses; and training code for these models across a range of self-supervised objective functions, so that others may possibly use them as a basis for modeling other small animal visual systems.
+This repo contains self-supervised, ImageNet pre-trained convolutional network PyTorch models of mouse visual cortex; the preprocessed neural responses; and training code for these models across a range of self-supervised objective functions, so that others may possibly use them as a basis for modeling other small animal visual systems.
 
 This repository is based on our paper:
 
