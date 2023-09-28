@@ -43,9 +43,16 @@ It is trained with the Instance Recognition objective on `64x64`-pixel ImageNet 
 - `shi_mousenet_vispor5_ir`, which is the same as `shi_mousenet_ir`, but where the final loss layer reads off of the penultimate layer (`VISpor5`) of the model, rather than the concatenation of the earlier layers as originally proposed.
 
 ## Training Code
-Download ImageNet and then run under `mouse_vision/model_training/`,
-`python run_trainer.py --config=[]`.
+Download ImageNet and then run under `mouse_vision/model_training/`:
+```
+CUDA_VISIBLE_DEVICES=[gpu_id] python run_trainer.py --config=[]
+```
 The loss functions available are implemented in the `mouse_vision/loss_functions/` [directory](https://github.com/neuroailab/mouse-vision/tree/main/mouse_vision/loss_functions), and include self-supervised loss functions such as: Instance Recognition, SimCLR, SimSiam, VICReg, BarlowTwins, MoCov2, RotNet, RelativeLocation, and AutoEncoding; along with supervised loss functions such as: Depth Prediction and CrossEntropy (for categorization).
+
+For example, to train our best model overall (`alexnet_bn_ir`), you can run this command:
+```
+CUDA_VISIBLE_DEVICES=0 python run_trainer.py --config=configs/ir/alexnet_bn_ir.json
+```
 
 
 ## Neural Responses
