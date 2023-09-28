@@ -61,6 +61,7 @@ from mouse_vision.core.utils import open_dataset
 d = open_dataset(/path/to/file.pkl)
 ```
 You can see [this notebook](https://github.com/neuroailab/mouse-vision/blob/main/Loading%20neural%20data.ipynb) for an example of loading and interacting with the neural data.
+If you prefer to load the the neural responses directly from the Allen SDK, you can refer to the `mouse_vision/neural_data` [directory](https://github.com/neuroailab/mouse-vision/tree/main/mouse_vision/neural_data).
 
 ## Cite
 If you used this codebase for your research, please consider citing our paper:
