@@ -30,7 +30,7 @@ This will save them to the current directory in the folder `./model_ckpts/`.
 If you want a subset of the models, feel free to modify the for loop in the above bash script.
 
 Models are named according to the convention of `[architecture]_[lossfunction]`, all of which are trained on the ImageNet dataset and described in [our paper](https://www.biorxiv.org/content/10.1101/2021.06.16.448730).
-You can see [this notebook](https://github.com/neuroailab/mouse-vision/blob/main/Loading%20model%20weights.ipynb) for an example of loading pre-trained models.
+*You can see [this notebook](https://github.com/neuroailab/mouse-vision/blob/main/Loading%20model%20weights.ipynb) for an example of loading pre-trained models.*
 
 Some models may be better suited than others based on your needs, but we recommend: 
 - `alexnet_bn_ir`, which is overall our best predictive model of mouse visual cortical responses (specifically, the first four layers: `features.3`, `features.7`, `features.10`, and `features.13`, as can be seen in Figure 2B).
@@ -73,7 +73,7 @@ You can load the corresponding neural dataset with the command:
 from mouse_vision.core.utils import open_dataset
 d = open_dataset(/path/to/file.pkl)
 ```
-You can see [this notebook](https://github.com/neuroailab/mouse-vision/blob/main/Loading%20neural%20data.ipynb) for an example of loading and interacting with the neural data.
+*You can see [this notebook](https://github.com/neuroailab/mouse-vision/blob/main/Loading%20neural%20data.ipynb) for an example of loading and interacting with the neural data.*
 If you prefer to load the the neural responses directly from the Allen SDK, you can refer to the `mouse_vision/neural_data` [directory](https://github.com/neuroailab/mouse-vision/tree/main/mouse_vision/neural_data).
 
 ## Cite
