@@ -35,12 +35,17 @@ class Trainer:
         self.optimizer = self.initialize_optimizer()
 
         # Set MongoDB Interface
-        self.database = MongoInterface(
-            database_name=self.config["db_name"],
-            collection_name=self.config["coll_name"],
-            port=self.config["port"],
-            print_fn=self.print_fn,
-        )
+        if not self.config.get("use_mongodb", False):
+            self.use_mongodb = self.config.get("use_mongodb", False)
+            self.database = None
+        else:
+            self.use_mongodb = True
+            self.database = MongoInterface(
+                database_name=self.config["db_name"],
+                collection_name=self.config["coll_name"],
+                port=self.config["port"],
+                print_fn=self.print_fn,
+            )
 
         # This will be changed depending on whether or not we are loading from a
         # checkpoint. See the derived class' implementation of load_checkpoint().
@@ -100,6 +105,8 @@ class Trainer:
         # by the xm.save() cmd in save_checkpoint. These included keys to be saved
         # to the database, however, are the same across tpu cores since they are
         # the result of xm.mesh_reduce().
+        if not self.use_mongodb:
+            return
         record = {"exp_id": self.config["exp_id"]}
         record.update({k: curr_state[k] for k in save_keys})
         if self.rank == 0:
@@ -251,6 +258,8 @@ class Trainer:
         assert not self.model.training
 
     def close_db(self):
+        if not self.use_mongodb:
+            return
         if self.rank == 0:
             self.database.sync_with_host()
 

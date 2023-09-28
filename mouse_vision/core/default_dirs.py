@@ -14,7 +14,7 @@ CALCIUM_DATA_PATH_WITH_RELS = os.path.join(
 )
 
 # ImageNet data directory: add path to ImageNet
-IMAGENET_DATA_DIR = "/data2/chengxuz/imagenet_raw"
+IMAGENET_DATA_DIR = "/data5/chengxuz/imagenet_raw"
 
 # CIFAR10 data directory: add path to CIFAR10
 CIFAR10_DATA_DIR = ""
