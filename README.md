@@ -51,7 +51,7 @@ CUDA_VISIBLE_DEVICES=[gpu_id] python run_trainer.py --config=[]
 ```
 The loss functions available are implemented in the `mouse_vision/loss_functions/` [directory](https://github.com/neuroailab/mouse-vision/tree/main/mouse_vision/loss_functions), and include self-supervised loss functions such as: Instance Recognition, SimCLR, SimSiam, VICReg, BarlowTwins, MoCov2, RotNet, RelativeLocation, and AutoEncoding; along with supervised loss functions such as: Depth Prediction and CrossEntropy (for categorization).
 
-Model architectures are implemented in the `mouse_vision/models/` [directory](https://github.com/neuroailab/mouse-vision/tree/main/mouse_vision/models), and range from multi-stream models (our custom parallel stream models and the Shi *et al.* 2020 MouseNet) to single stream feedforward networks such as AlexNet, ResNets, etc.
+Model architectures are implemented in the `mouse_vision/models/` [directory](https://github.com/neuroailab/mouse-vision/tree/main/mouse_vision/models), and range from multi-stream models (our custom parallel stream models and the Shi *et al.* 2020 MouseNet), multi-stream sparse autoencoders, to single stream feedforward networks such as AlexNet, ResNets, etc.
 
 For example, to train our best model overall (`alexnet_bn_ir`), you can run this command:
 ```
