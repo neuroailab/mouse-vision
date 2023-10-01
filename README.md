@@ -33,7 +33,7 @@ Models are named according to the convention of `[architecture]_[lossfunction]`,
 *You can see [this notebook](https://github.com/neuroailab/mouse-vision/blob/main/Loading%20model%20weights.ipynb) for an example of loading pre-trained models.*
 
 Some models may be better suited than others based on your needs, but we recommend: 
-- `alexnet_bn_ir`, which is overall our best predictive model of mouse visual cortical responses (specifically, the first four layers: `features.3`, `features.7`, `features.10`, and `features.13`, as can be seen in Figure 2B).
+- `alexnet_bn_ir`, which is overall our best predictive model of mouse visual cortical responses (specifically, the first [four layers](https://github.com/neuroailab/mouse-vision/blob/main/mouse_vision/models/model_layers.py#L6-L10): `features.3`, `features.7`, `features.10`, and `features.13`, as can be seen in Figure 2B).
 *We highly recommend this model for general purpose use.*
 It is an AlexNet architecture trained with the Instance Recognition objective on `64x64`-pixel ImageNet inputs.
 - `dual_stream_ir`, which is our second best predictive model and models the skip connections of mouse visual cortex, consisting of two streams.
