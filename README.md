@@ -7,7 +7,7 @@ This repository is based on our paper:
 
 ["Mouse visual cortex as a limited resource system that self-learns an ecologically-general representation"](https://www.biorxiv.org/content/10.1101/2021.06.16.448730)
 
-*PLOS Computational Biology 2023 (in press)*
+*PLOS Computational Biology* 19(10): e1011506. https://doi.org/10.1371/journal.pcbi.1011506
 
 ## Getting started
 It is recommended that you install this repo within a virtual environment (Python 3.6 recommended), and run inferences there.
@@ -78,10 +78,16 @@ If you prefer to load the the neural responses directly from the Allen SDK, you 
 If you used this codebase for your research, please consider citing our paper:
 ```
 @article{NayebiKong2023mouse,
-  title={Mouse visual cortex as a limited resource system that self-learns an ecologically-general representation},
-  author={Nayebi, Aran* and Kong, NC* and Zhuang, Chengxu and Gardner, Justin L and Norcia, Anthony M and Yamins, DL},
-  journal={PLOS Computational Biology},
-  year={2023}
+    doi = {10.1371/journal.pcbi.1011506},
+    author = {Nayebi*, Aran AND Kong*, Nathan C. L. AND Zhuang, Chengxu AND Gardner, Justin L. AND Norcia, Anthony M. AND Yamins, Daniel L. K.},
+    journal = {PLOS Computational Biology},
+    publisher = {Public Library of Science},
+    title = {Mouse visual cortex as a limited resource system that self-learns an ecologically-general representation},
+    year = {2023},
+    month = {10},
+    volume = {19},
+    url = {https://doi.org/10.1371/journal.pcbi.1011506},
+    pages = {1-36},
 }
 ```
 
