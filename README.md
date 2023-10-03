@@ -39,9 +39,9 @@ Some models may be better suited than others based on your needs, but we recomme
 - `dual_stream_ir`, which is our second best predictive model and models the skip connections of mouse visual cortex, consisting of two streams.
 It is trained with the Instance Recognition objective on `64x64`-pixel ImageNet inputs.
 - `six_stream_simclr`, which is our best predictive six stream architecture, and is trained with the SimCLR objective on `64x64`-pixel ImageNet inputs.
-- `shi_mousenet_ir`, which is the Shi *et al.* 2020 MouseNet architecture that attempts to map the details of the mouse connectome onto a CNN architecture, and is trained with an Instance Recognition objective on `64x64`-pixel ImageNet inputs.
+- `shi_mousenet_ir`, which is the [Shi *et al.* 2020 MouseNet](https://doi.org/10.1371/journal.pcbi.1010427) architecture that attempts to map the details of the mouse connectome onto a CNN architecture, and is trained with an Instance Recognition objective on `64x64`-pixel ImageNet inputs.
 - `shi_mousenet_vispor5_ir`, which is the same as `shi_mousenet_ir`, but where the final loss layer reads off of the penultimate layer (`VISpor5`) of the model, rather than the concatenation of the earlier layers as originally proposed.
-We thought this might aid the original Shi *et al.* 2020 MouseNet’s task performance and neural predictivity, since it can be difficult to train linear layers when the input dimensionality is very large.
+We thought this might aid the original [Shi *et al.* 2020 MouseNet](https://doi.org/10.1371/journal.pcbi.1010427)’s task performance and neural predictivity, since it can be difficult to train linear layers when the input dimensionality is very large.
 We found that this model better predicted the mouse visual cortex Neuropixels responses than `shi_mousenet_ir`.
 
 ## Training Code
