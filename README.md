@@ -9,6 +9,8 @@ This repository is based on our paper:
 
 *PLOS Computational Biology* 19(10): e1011506. https://doi.org/10.1371/journal.pcbi.1011506
 
+Here's a [video recording](https://www.youtube.com/watch?v=9h_3bHVDMhA&t=650s) that explains our work a bit.
+
 ## Getting started
 It is recommended that you install this repo within a virtual environment (Python 3.6 recommended), and run inferences there.
 An example command for doing this with `anaconda` would be:
