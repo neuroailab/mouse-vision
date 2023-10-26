@@ -47,9 +47,9 @@ We found that this model better predicted the mouse visual cortex Neuropixels re
 ## Training Code
 Download ImageNet (or your image dataset of choice) and then run under `mouse_vision/model_training/`:
 ```
-CUDA_VISIBLE_DEVICES=[gpu_id] python run_trainer.py --config=[]
+python run_trainer.py --config=[]
 ```
-The loss functions available are implemented in the `mouse_vision/loss_functions/` [directory](https://github.com/neuroailab/mouse-vision/tree/main/mouse_vision/loss_functions), and include self-supervised loss functions such as: Instance Recognition, SimCLR, SimSiam, VICReg, BarlowTwins, MoCov2, RotNet, RelativeLocation, and AutoEncoding; along with supervised loss functions such as: Depth Prediction and CrossEntropy (for categorization).
+Specify the `gpu_id` in the config. The loss functions available are implemented in the `mouse_vision/loss_functions/` [directory](https://github.com/neuroailab/mouse-vision/tree/main/mouse_vision/loss_functions), and include self-supervised loss functions such as: Instance Recognition, SimCLR, SimSiam, VICReg, BarlowTwins, MoCov2, RotNet, RelativeLocation, and AutoEncoding; along with supervised loss functions such as: Depth Prediction and CrossEntropy (for categorization).
 
 Model architectures are implemented in the `mouse_vision/models/` [directory](https://github.com/neuroailab/mouse-vision/tree/main/mouse_vision/models), and range from multi-stream models (our custom parallel stream models and the [Shi *et al.* 2020 MouseNet](https://doi.org/10.1371/journal.pcbi.1010427)), multi-stream sparse autoencoders, to single stream feedforward networks such as AlexNet, ResNets, etc.
 
