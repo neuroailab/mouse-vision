@@ -1,6 +1,8 @@
 # Models of Mouse Vision
 This repo contains self-supervised, ImageNet pre-trained convolutional network PyTorch models of mouse visual cortex; the preprocessed neural responses; and training code for these models across a range of self-supervised objective functions, so that others may possibly use them as a basis for modeling other small animal visual systems.
 
+Since our models are stimulus-computable, they can be applied to new visual stimuli without modification and generate predictions for further neural and behavioral experiments of your design.
+
 This repository is based on our paper:
 
 **Aran Nayebi\*, Nathan C. L. Kong\*, Chengxu Zhuang, Justin L. Gardner, Anthony M. Norcia, Daniel L. K. Yamins**
